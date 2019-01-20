@@ -5,4 +5,9 @@
     <color name="colorAccent">#D81B60</color>
     <color name="fab_color">#AA00FF</color>
     <color name="color_events_background_color">#fffafa</color>
+    <color name="color_event">#13A89E</color>
+    <color name="gradient_start">#2BB673</color>
+    <color name="gradient_end">#00A79D</color>
+    <color name="icon_color">#939598</color>
+
 </resources>

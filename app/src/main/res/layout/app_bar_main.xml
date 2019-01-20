@@ -17,7 +17,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:background="?attr/colorPrimary"
-                app:popupTheme="@style/AppTheme.PopupOverlay"/>
+                app:popupTheme="@style/AppTheme.CustomFont.PopupOverlay"/>
 
     </android.support.design.widget.AppBarLayout>
 
@@ -27,8 +27,13 @@
             android:id="@+id/fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
+            android:layout_gravity="bottom|center"
             android:layout_margin="@dimen/fab_margin"
-            app:srcCompat="@android:drawable/ic_dialog_email"/>
+            app:srcCompat="@drawable/ic_baseline_keyboard_arrow_down_24px"
+            android:backgroundTint="@android:color/white"
+            app:borderWidth="0dp"
+            android:backgroundTintMode="src_atop"
+
+           />
 
 </android.support.design.widget.CoordinatorLayout>

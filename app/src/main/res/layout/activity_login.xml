@@ -2,20 +2,24 @@
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
-
-    <FrameLayout android:layout_width="wrap_content"
-                 android:layout_height="match_parent"
-    >
-
-
-        <VideoView android:layout_width="wrap_content"
-                   android:layout_height="wrap_content"
-
+    <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+        <VideoView android:id="@+id/video_backdrop"
+                   android:layout_width="match_parent"
+                   android:layout_height="match_parent"
+                   style="@style/AppTheme.NoActionBar"
+                   android:layout_gravity="center"
+                   app:layout_constraintDimensionRatio="16:9"
+                   android:layout_alignParentBottom="true"
+                   android:layout_alignParentLeft="true"
+                   android:layout_alignParentRight="true"
+                   android:layout_alignParentTop="true"
         />
-    </FrameLayout>
+    </RelativeLayout>
 
     <ImageView
             android:id="@+id/logo"
@@ -29,7 +33,8 @@
     <TextView android:id="@+id/title"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
-              android:text="@string/app_name"
+              android:text="@string/title_name"
+              app:fontFamily="@font/lobster"
               android:textStyle="bold"
               android:textSize="30sp"
               android:layout_centerHorizontal="true"

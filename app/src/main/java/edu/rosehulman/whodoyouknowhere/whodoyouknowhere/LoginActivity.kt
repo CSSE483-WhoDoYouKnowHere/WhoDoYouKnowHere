@@ -1,30 +1,29 @@
 package edu.rosehulman.whodoyouknowhere.whodoyouknowhere
 
+import android.Manifest.permission.READ_CONTACTS
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.annotation.TargetApi
-import android.content.pm.PackageManager
-import android.support.design.widget.Snackbar
-import android.support.v7.app.AppCompatActivity
 import android.app.LoaderManager.LoaderCallbacks
 import android.content.CursorLoader
 import android.content.Loader
+import android.content.pm.PackageManager
 import android.database.Cursor
 import android.net.Uri
 import android.os.AsyncTask
 import android.os.Build
 import android.os.Bundle
 import android.provider.ContactsContract
+import android.support.design.widget.Snackbar
+import android.support.v7.app.AppCompatActivity
 import android.text.TextUtils
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.ArrayAdapter
 import android.widget.TextView
-
-import java.util.ArrayList
-import android.Manifest.permission.READ_CONTACTS
-
+import android.widget.VideoView
 import kotlinx.android.synthetic.main.activity_login.*
+import java.util.*
 
 /**
  * A login screen that offers login via email/password.
@@ -34,11 +33,16 @@ class LoginActivity : AppCompatActivity(), LoaderCallbacks<Cursor> {
      * Keep track of the login task to ensure we can cancel it if requested.
      */
     private var mAuthTask: UserLoginTask? = null
+    private lateinit var videoView: VideoView
+    private val VIDEO_FILE = "login_backdrop"
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
         // Set up the login form.
+        videoView = video_backdrop
+        initializeVideoPlayer()
         populateAutoComplete()
         password.setOnEditorActionListener(TextView.OnEditorActionListener { _, id, _ ->
             if (id == EditorInfo.IME_ACTION_DONE || id == EditorInfo.IME_NULL) {
@@ -49,6 +53,44 @@ class LoginActivity : AppCompatActivity(), LoaderCallbacks<Cursor> {
         })
 
         email_sign_in_button.setOnClickListener { attemptLogin() }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        initializeVideoPlayer()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        releaseVideoPlayer()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+            videoView.pause()
+        }
+    }
+
+    private fun getMedia(mediaName: String): Uri {
+        return Uri.parse(
+            "android.resource://" + packageName +
+                    "/raw/" + mediaName
+        )
+    }
+
+    private fun initializeVideoPlayer() {
+        val videoUri = getMedia(VIDEO_FILE)
+        videoView.setVideoURI(videoUri)
+        videoView.start()
+        if (!videoView.isPlaying) {
+            videoView.start()
+        }
+    }
+
+    private fun releaseVideoPlayer() {
+        // Stop video after login, release resources.
+        videoView.stopPlayback()
     }
 
     private fun populateAutoComplete() {
