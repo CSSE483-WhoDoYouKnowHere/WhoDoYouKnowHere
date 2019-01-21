@@ -22,4 +22,8 @@
     <string name="title_activity_event_org">EventOrgActivity</string>
     <string name="user">User</string>
     <string name="org_events">Your Events</string>
+    <string name="add_dialog_title">Add Event</string>
+    <string name="add_dialog_toggle_on">Yes</string>
+    <string name="add_dialog_toggle_off">No</string>
+
 </resources>
