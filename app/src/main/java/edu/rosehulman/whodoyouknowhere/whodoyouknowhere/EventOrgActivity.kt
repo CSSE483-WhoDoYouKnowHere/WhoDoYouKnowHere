@@ -1,6 +1,5 @@
 package edu.rosehulman.whodoyouknowhere.whodoyouknowhere
 
-import android.icu.util.CurrencyAmount
 import android.os.Bundle
 import android.support.design.widget.NavigationView
 import android.support.design.widget.Snackbar
@@ -11,7 +10,6 @@ import android.support.v7.app.AppCompatActivity
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.EditText
 import android.widget.ToggleButton
 import kotlinx.android.synthetic.main.activity_event_org.*
 import kotlinx.android.synthetic.main.add_event_dialog.view.*
@@ -27,7 +25,7 @@ class EventOrgActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
         setSupportActionBar(toolbar)
 
         fab.setOnClickListener { view ->
-            Snackbar.make(view, "pee pee poo poo man", Snackbar.LENGTH_LONG)
+            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show()
         }
 
@@ -89,10 +87,8 @@ class EventOrgActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
             val eventLocation = view.add_location_edit_text
             val isAgeRestriction = view.age_restriction_toggle.isChecked
             val eventType = "Party"
-            val entryFee = view.add_entry_fee_edit_text.text.to(CurrencyAmount)
-
-
-            buildEvent(Event())
+           // val entryFee = view.add_entry_fee_edit_text.text.to(CurrencyAmount)
+           // buildEvent(Event())
 
         }
         builder.setNegativeButton(android.R.string.cancel, null) // :)
