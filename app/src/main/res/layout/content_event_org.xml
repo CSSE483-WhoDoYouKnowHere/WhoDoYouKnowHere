@@ -8,6 +8,6 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         tools:showIn="@layout/app_bar_event_org"
         tools:context=".MainActivity"
-        android:id="@+id/event_recycler_view"
+        android:id="@+id/event_org_recycler_view"
         android:background="@color/colorEventBG">
 </android.support.v7.widget.RecyclerView>
