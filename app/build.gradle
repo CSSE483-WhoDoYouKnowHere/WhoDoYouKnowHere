@@ -39,5 +39,12 @@ dependencies {
     implementation 'com.google.firebase:firebase-auth:16.1.0' // new
     implementation 'com.google.firebase:firebase-core:16.0.6' // new
     implementation 'com.android.support:multidex:1.0.3'
+    implementation 'com.android.support:recyclerview-v7:27.1.1'
+    implementation 'com.mindorks.android:placeholderview:1.0.3'
+    kapt 'com.mindorks.android:placeholderview-compiler:1.0.3'
+    implementation 'com.squareup.picasso:picasso:2.71828'
+
 }
 apply plugin: 'com.google.gms.google-services'
+apply plugin: 'kotlin-kapt'
+
