@@ -42,56 +42,6 @@
             android:inputType="textPostalAddress"
     />
 
-    <TextView
-            android:text="Age Restriction?"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/textview_age_restriction_text"/>
-    <ToggleButton
-            android:id="@+id/age_restriction_toggle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textOff="@string/add_dialog_toggle_off"
-            android:textOn="@string/add_dialog_toggle_on"
-            android:checked="false"/>
-
-    <TextView
-            android:text="Entry Fee"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/textview_fee_text"/>
-
-    <LinearLayout
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-    >
-        <TextView
-                android:text="$"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/textview_currency_type_text"/>
-        <EditText
-                android:id="@+id/add_entry_fee_edit_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="numberDecimal"
-        />
-    </LinearLayout>
-
-    <TextView
-            android:text="Password"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/textview_password_text"/>
-    <EditText
-            android:id="@+id/add_password_edit_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="textPassword"
-    />
-
 
 
 </LinearLayout>
