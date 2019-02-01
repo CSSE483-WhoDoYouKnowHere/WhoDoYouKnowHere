@@ -56,7 +56,7 @@
                 android:layout_gravity="bottom|end"
                 android:layout_margin="@dimen/fab_margin"
                 app:srcCompat="@drawable/ic_add_white_24dp"
-                android:backgroundTint="@color/fab_color"
+                android:backgroundTint="@color/colorSecondary"
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentRight="true"/>
 

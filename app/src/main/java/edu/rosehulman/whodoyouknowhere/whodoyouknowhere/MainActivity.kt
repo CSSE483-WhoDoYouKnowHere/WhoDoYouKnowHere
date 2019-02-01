@@ -21,14 +21,19 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private lateinit var recyclerView: RecyclerView
     private lateinit var eventAdapter: EventAdapter
     private lateinit var viewManager: LinearLayoutManager
+    var uid: String = ""
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
-
+        val extras = intent.extras
+        if (extras != null) {
+            uid = extras.getString(Constants.UID)
+        }
         viewManager = LinearLayoutManager(this)
-        eventAdapter = EventAdapter(this,viewManager)
+        eventAdapter = EventAdapter(this, viewManager)
 
         recyclerView = findViewById<RecyclerView>(R.id.event_recycler_view).apply {
 
@@ -110,7 +115,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         return true
     }
 
-    private fun startEventOrgActivity(){
+    private fun startEventOrgActivity() {
         val intent = Intent(this, EventOrgActivity::class.java)
         //intent.putExtra("something", true)
         startActivity(intent)
