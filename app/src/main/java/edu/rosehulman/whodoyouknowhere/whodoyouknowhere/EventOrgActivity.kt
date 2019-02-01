@@ -25,8 +25,7 @@ class EventOrgActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
         setSupportActionBar(toolbar)
 
         fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show()
+            showAddDialog()
         }
 
         val toggle = ActionBarDrawerToggle(
@@ -73,22 +72,22 @@ class EventOrgActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
         val view = LayoutInflater.from(this).inflate(R.layout.add_event_dialog, null, false)
         builder.setView(view)
 
-        val toggleButton = view.findViewById<ToggleButton>(R.id.age_restriction_toggle)
-        toggleButton?.setOnCheckedChangeListener { _, isChecked ->
-            val msg = "Toggle Button is " + if (isChecked) "ON" else "OFF"
-
-        }
+//        val toggleButton = view.findViewById<ToggleButton>(R.id.age_restriction_toggle)
+//        toggleButton?.setOnCheckedChangeListener { _, isChecked ->
+//            val msg = "Toggle Button is " + if (isChecked) "ON" else "OFF"
+//
+//        }
 
 
         builder.setPositiveButton(android.R.string.ok) { _, _ ->
 
-            val eventName = view.add_name_edit_text
+            val eventName = view.add_name_edit_text.toString()
             val eventDate = view.add_date_edit_text
             val eventLocation = view.add_location_edit_text
-            val isAgeRestriction = view.age_restriction_toggle.isChecked
+//            val isAgeRestriction = view.age_restriction_toggle.isChecked
             val eventType = "Party"
            // val entryFee = view.add_entry_fee_edit_text.text.to(CurrencyAmount)
-           // buildEvent(Event())
+//            buildEvent(Event(eventName, ))
 
         }
         builder.setNegativeButton(android.R.string.cancel, null) // :)
