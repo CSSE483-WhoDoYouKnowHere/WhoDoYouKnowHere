@@ -7,6 +7,8 @@ import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
@@ -20,7 +22,9 @@ import java.util.*
 
 class EventOrgActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
-    private lateinit var adapter: EventOrgAdapter
+    private lateinit var eventOrgAdapter: EventOrgAdapter
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var viewManager: LinearLayoutManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,13 +36,23 @@ class EventOrgActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
             this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
         )
 
-        adapter = EventOrgAdapter(this)
+        eventOrgAdapter = EventOrgAdapter(this)
 
-        fab.setOnClickListener {
-            adapter.showAddEditDialog()
+        viewManager = LinearLayoutManager(this)
+
+        recyclerView = findViewById<RecyclerView>(R.id.event_org_recycler_view).apply {
+
+            setHasFixedSize(true)
+
+            layoutManager = viewManager
+
+            adapter = eventOrgAdapter
+
         }
 
-
+        fab.setOnClickListener {
+            eventOrgAdapter.showAddEditDialog()
+        }
 
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()

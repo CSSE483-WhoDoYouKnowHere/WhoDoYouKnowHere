@@ -14,8 +14,6 @@ class EventOrgAdapter(val context: Context?) : RecyclerView.Adapter<EventOrgView
 
     private var events = ArrayList<Event>()
 
-
-
     override fun getItemCount() = events.size
 
     override fun onBindViewHolder(holder: EventOrgViewHolder, position: Int) {
@@ -70,6 +68,7 @@ class EventOrgAdapter(val context: Context?) : RecyclerView.Adapter<EventOrgView
 
     fun add(event: Event) {
         events.add(event)
+        notifyDataSetChanged()
     }
 
     fun edit(position: Int, title: String, date: String, location: String) {

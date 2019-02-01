@@ -16,7 +16,7 @@ class EventOrgViewHolder(itemView: View, val adapter: EventOrgAdapter, val conte
 
     init {
         itemView.setOnClickListener {
-            //Maybe do something later? Detail Fragment?
+            adapter.showAddEditDialog(adapterPosition)
         }
     }
 
