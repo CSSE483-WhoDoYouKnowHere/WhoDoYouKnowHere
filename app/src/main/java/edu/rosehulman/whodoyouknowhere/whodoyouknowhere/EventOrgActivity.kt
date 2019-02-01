@@ -28,10 +28,15 @@ class EventOrgActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
         setSupportActionBar(toolbar)
 
 
-
         val toggle = ActionBarDrawerToggle(
             this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
         )
+
+        adapter = EventOrgAdapter(this)
+
+        fab.setOnClickListener {
+            adapter.showAddEditDialog()
+        }
 
 
 
