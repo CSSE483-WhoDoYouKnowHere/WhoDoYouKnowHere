@@ -4,9 +4,9 @@ import java.util.*
 
 
 data class Event(
-    val eventID: Int = 0, var title: String, var date: Date, var location: String, var description: String = "A fun get-together!",
-    var ageRestriction: Boolean, var eventType: String = "Party",
-    var entryFee: Double = 0.00, var password: String = "",
+    val eventID: Int = 0, var title: String="Title", var date: String="1/12/19", var location: String="Olympus Mons,Mars", var description: String = "A fun get-together!",
+    var ageRestriction: Boolean= false, var eventType: String = "Party",
+    var entryFee: Double = 0.0, var password: String = "",
     val hostID: Int = 0, var attendeeList: ArrayList<User> = ArrayList<User>(0)
 ) {
 
