@@ -91,8 +91,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         // Handle navigation view item clicks here.
         when (item.itemId) {
-            R.id.nav_user_org -> {
-                startEventOrgActivity()
+            R.id.nav_hosted_events -> {
+                startEventOrgActivity(uid)
             }
             R.id.nav_gallery -> {
 
@@ -115,8 +115,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         return true
     }
 
-    private fun startEventOrgActivity() {
-        val intent = Intent(this, EventOrgActivity::class.java)
+    private fun startEventOrgActivity(uid : String) {
+        val intent = Intent(this, EventOrgActivity(uid)::class.java)
         //intent.putExtra("something", true)
         startActivity(intent)
         finish()

@@ -4,7 +4,9 @@ import android.os.Parcel
 import android.os.Parcelable
 import com.google.type.Date
 
-data class User(val userID: Int, var fullName: String, val dataOfBirth: Date, val gender: String, var privacy : Boolean, var locationID: Int, var description: String):Parcelable {
+data class User(val userID: Int, var fullName: String, val dataOfBirth: Date, val gender: String,
+                var privacy : Boolean, var locationID: Int, var description: String,
+                val eventsHosting : ArrayList<Event>) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readInt(),
         parcel.readString(),
@@ -12,7 +14,8 @@ data class User(val userID: Int, var fullName: String, val dataOfBirth: Date, va
         parcel.readString(),
         parcel.readByte() != 0.toByte(),
         parcel.readInt(),
-        parcel.readString()
+        parcel.readString(),
+
     ) {
     }
 

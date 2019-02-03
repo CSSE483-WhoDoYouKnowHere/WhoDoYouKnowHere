@@ -20,11 +20,12 @@ import kotlinx.android.synthetic.main.add_event_dialog.view.*
 import kotlinx.android.synthetic.main.app_bar_event_org.*
 import java.util.*
 
-class EventOrgActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
+class EventOrgActivity(val uid : String) : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
     private lateinit var eventOrgAdapter: EventOrgAdapter
     private lateinit var recyclerView: RecyclerView
     private lateinit var viewManager: LinearLayoutManager
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,7 +37,7 @@ class EventOrgActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
             this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
         )
 
-        eventOrgAdapter = EventOrgAdapter(this)
+        eventOrgAdapter = EventOrgAdapter(this, uid)
 
         viewManager = LinearLayoutManager(this)
 
