@@ -5,26 +5,51 @@ import android.os.Bundle
 import android.support.design.widget.NavigationView
 import android.support.design.widget.Snackbar
 import android.support.v4.view.GravityCompat
+import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.helper.ItemTouchHelper
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
+import android.widget.ImageButton
+import android.widget.Toast
+import com.google.firebase.auth.FirebaseAuth
+import com.mindorks.placeholderview.SwipeDecor
+import com.mindorks.placeholderview.SwipePlaceHolderView
+import com.mindorks.placeholderview.SwipeViewBuilder
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
+import kotlinx.android.synthetic.main.nav_header_main.view.*
+
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
-    private lateinit var mItemTouchHelper: ItemTouchHelper
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var eventAdapter: EventAdapter
-    private lateinit var viewManager: LinearLayoutManager
-    var uid: String = ""
+//    private lateinit var mItemTouchHelper: ItemTouchHelper
+//    private lateinit var recyclerView: RecyclerView
+//    private lateinit var eventAdapter: EventAdapter
+//    private lateinit var viewManager: LinearLayoutManager
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+    lateinit var authListener: FirebaseAuth.AuthStateListener
+    private var uid: String? = null
+    private var backButtonCount = 0
+
+    private lateinit var mSwipeView: SwipePlaceHolderView
+
+
+    override fun onStart() {
+        super.onStart()
+        auth.addAuthStateListener(authListener)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        auth.removeAuthStateListener(authListener)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        //setContentView(R.layout.activity_main)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
@@ -32,22 +57,22 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if (extras != null) {
             uid = extras.getString(Constants.UID)
         }
-        viewManager = LinearLayoutManager(this)
-        eventAdapter = EventAdapter(this, viewManager)
-
-        recyclerView = findViewById<RecyclerView>(R.id.event_recycler_view).apply {
-
-            setHasFixedSize(true)
-
-            layoutManager = viewManager
-
-            adapter = eventAdapter
-
-        }
-
-        val callback = SimpleItemTouchHelperCallback(eventAdapter)
-        mItemTouchHelper = ItemTouchHelper(callback)
-        mItemTouchHelper.attachToRecyclerView(recyclerView)
+//        viewManager = LinearLayoutManager(this)
+//        eventAdapter = EventAdapter(this, viewManager)
+//
+//        recyclerView = findViewById<RecyclerView>(R.id.event_recycler_view).apply {
+//
+//            setHasFixedSize(true)
+//
+//            layoutManager = viewManager
+//
+//            adapter = eventAdapter
+//
+//        }
+//
+//        val callback = SimpleItemTouchHelperCallback(eventAdapter)
+//        mItemTouchHelper = ItemTouchHelper(callback)
+//        mItemTouchHelper.attachToRecyclerView(recyclerView)
 
 
         fab.setOnClickListener { view ->
@@ -58,15 +83,65 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val toggle = ActionBarDrawerToggle(
             this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
         )
-        drawer_layout.addDrawerListener(toggle)
-        toggle.syncState()
 
+
+        drawer_layout.addDrawerListener(
+            object : DrawerLayout.DrawerListener {
+                override fun onDrawerStateChanged(newState: Int) {
+                    // do nothing
+                }
+
+                override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
+                    // do nothing
+                }
+
+                override fun onDrawerOpened(drawerView: View) {
+                    drawerView.sign_out_button.setOnClickListener {
+                        Log.d(Constants.TAG, "Sign out button clicked")
+                        auth.signOut()
+                    }
+                    drawerView.account_edit_button.setOnClickListener {
+                        editProfileDialog()
+                    }
+                }
+
+                override fun onDrawerClosed(drawerView: View) {
+                    //do nothing
+                }
+            })
+        setupSwipeView()
+        initializeListeners()
+        toggle.syncState()
         nav_view.setNavigationItemSelectedListener(this)
     }
 
+    private fun initializeListeners() {
+        authListener = FirebaseAuth.AuthStateListener { auth: FirebaseAuth ->
+            val user = auth.currentUser
+            Log.d(Constants.TAG, "User: $user")
+            if (user == null) {
+                switchToLoginActivity()
+            }
+        }
+    }
+
+    private fun switchToLoginActivity() {
+        val intent = Intent(this, LoginActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        startActivity(intent)
+    }
+
     override fun onBackPressed() {
+        if (backButtonCount >= 1) {
+            finish()
+        } else {
+            Toast.makeText(this, getString(R.string.back_button_exit_toast), Toast.LENGTH_SHORT)
+                .show()
+            backButtonCount++
+        }
         if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
             drawer_layout.closeDrawer(GravityCompat.START)
+
         } else {
             super.onBackPressed()
         }
@@ -92,7 +167,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         // Handle navigation view item clicks here.
         when (item.itemId) {
             R.id.nav_hosted_events -> {
-                startEventOrgActivity(uid)
+                startEventOrgActivity(uid!!)
             }
             R.id.nav_gallery -> {
 
@@ -115,10 +190,38 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         return true
     }
 
-    private fun startEventOrgActivity(uid : String) {
+    private fun startEventOrgActivity(uid: String) {
         val intent = Intent(this, EventOrgActivity(uid)::class.java)
         //intent.putExtra("something", true)
         startActivity(intent)
         finish()
+    }
+
+    private fun editProfileDialog() {
+
+    }
+
+    private fun setupSwipeView() {
+        mSwipeView = findViewById(R.id.swipeView)
+
+        mSwipeView.getBuilder<SwipePlaceHolderView,SwipeViewBuilder<SwipePlaceHolderView>>()
+            .setDisplayViewCount(3)
+            .setSwipeDecor(
+                SwipeDecor()
+                    .setPaddingTop(20)
+                    .setRelativeScale(0.01f)
+                    .setSwipeInMsgLayoutId(R.layout.card_event_swipe_in)
+                    .setSwipeOutMsgLayoutId(R.layout.card_event_swipe_out)
+            )
+
+
+        for (i in 1..5) {
+            var event = Utils.getSampleEvents()
+            mSwipeView.addView(EventCard(this, event, mSwipeView))
+        }
+
+        findViewById<ImageButton>(R.id.rejectBtn).setOnClickListener { mSwipeView.doSwipe(false) }
+
+        findViewById<ImageButton>(R.id.acceptBtn).setOnClickListener { mSwipeView.doSwipe(true) }
     }
 }

@@ -15,7 +15,7 @@ data class User(val userID: Int, var fullName: String, val dataOfBirth: Date, va
         parcel.readByte() != 0.toByte(),
         parcel.readInt(),
         parcel.readString(),
-
+        TODO("eventsHosting")
     ) {
     }
 
@@ -41,5 +41,4 @@ data class User(val userID: Int, var fullName: String, val dataOfBirth: Date, va
             return arrayOfNulls(size)
         }
     }
-
 }
