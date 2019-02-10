@@ -16,5 +16,10 @@
     <string name="add_dialog_toggle_off">No</string>
     <string name="title_activity_login">LoginActivity</string>
     <string name="back_button_exit_toast">Press the back button once again to close the application.</string>
-
+    <string name="user_profile_dialog_title">User Profile</string>
+    <string-array name="sex_array">
+        <item>Male</item>
+        <item>Female</item>
+        <item>Other</item>
+    </string-array>
 </resources>

@@ -4,6 +4,8 @@ apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-android-extensions'
 
+apply plugin: 'kotlin-kapt'
+
 android {
     compileSdkVersion 27
     defaultConfig {
@@ -44,9 +46,8 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.2'
     implementation 'com.android.support:recyclerview-v7:27.1.1'
     implementation 'com.mindorks.android:placeholderview:1.0.3'
-    kapt 'com.mindorks.android:placeholderview-compiler:1.0.3'
+    kapt("com.mindorks.android:placeholderview-compiler:1.0.3")
     implementation 'jp.wasabeef:glide-transformations:2.0.2'
 }
 apply plugin: 'com.google.gms.google-services'
-apply plugin: 'kotlin-kapt'
 

@@ -1,79 +1,34 @@
 package edu.rosehulman.whodoyouknowhere.whodoyouknowhere
 
 import android.content.Context
+import android.graphics.Point
+import android.provider.ContactsContract
 import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
 import com.mindorks.placeholderview.SwipeDirection
 import com.mindorks.placeholderview.annotations.*
 import com.mindorks.placeholderview.annotations.swipe.*
+import kotlin.math.sqrt
 
 
-//@Layout(R.layout.swipe_placeholder_view)
-//class EventCard(
-//   val mContext: Context,
-//    val event: Event,
-//   val  mSwipeView: SwipePlaceHolderView
-//) {
-//
-//    @View(R.id.profileImageView)
-//    private val profileImageView: ImageView? = null
-//
-//    @View(R.id.eventNametxt)
-//    private val eventName: TextView? = null
-//
-//    @View(R.id.locationNameTxt)
-//    private val locationNameTxt: TextView? = null
-//
-//    @Resolve
-//    private fun onResolved() {
-////        Glide.with(mContext).load(mProfile.getImageUrl()).into(profileImageView)
-//        profileImageView?.setBackgroundColor(R.color.material_blue_grey_900)
-//        eventName!!.setText(event.title + ", " + event.eventType)
-//        locationNameTxt!!.setText(event.location)
-//    }
-//
-//    @SwipeOut
-//    private fun onSwipedOut() {
-//        Log.d("EVENT", "onSwipedOut")
-//       // mSwipeView.add(this)
-//    }
-//
-//    @SwipeCancelState
-//    private fun onSwipeCancelState() {
-//        Log.d("EVENT", "onSwipeCancelState")
-//    }
-//
-//    @SwipeIn
-//    private fun onSwipeIn() {
-//        Log.d("EVENT", "onSwipedIn")
-//    }
-//
-//    @SwipeInState
-//    private fun onSwipeInState() {
-//        Log.d("EVENT", "onSwipeInState")
-//    }
-//
-//    @SwipeOutState
-//    private fun onSwipeOutState() {
-//        Log.d("EVENT", "onSwipeOutState")
-//    }
-//}
-
-@NonReusable
 @Layout(R.layout.card_event_swipe_view)
-class EventCard(private val context: Context,
-                 private val event: Event,
-                 private val mSwipeView: SwipeView) {
+class TinderCard(private val context: Context,
+                 private val profile: ContactsContract.Profile,
+                 private val cardViewHolderSize: Point,
+                 private val callback: Callback) {
 
-    @View(R.id.profileImageView)
+    @View(R.id.cardSwipeView_Image)
     lateinit var profileImageView: ImageView
 
-    @View(R.id.eventNametxt)
-    lateinit var nameAgeTxt: TextView
+    @View(R.id.event_name_text_view)
+    lateinit var eventNameText: TextView
 
-    @View(R.id.locationNameTxt)
-    lateinit var locationNameTxt: TextView
+    @View(R.id.event_date_text_view)
+    lateinit var eventDateText: TextView
+
+    @View(R.id.event_location_text_view)
+    lateinit var eventLocationText: TextView
 
     @SwipeView
     lateinit var swipeView: android.view.View
@@ -84,19 +39,18 @@ class EventCard(private val context: Context,
 
     @Resolve
     fun onResolved() {
-//        Glide.with(context).load(profile.imageUrl).bitmapTransform(
-//            RoundedCornersTransformation(
-//                context,
-//                Utils.dpToPx(7),
-//                0,
-//                RoundedCornersTransformation.CornerType.TOP))
+//        Picasso.get()
+//            .load(mUrl)
+//            .resize(800, 800)
+//            .centerInside()
 //            .into(profileImageView)
-        nameAgeTxt.text = "${event.title},  ${event.date}"
-        locationNameTxt.text = event.location
+//        eventNameText.text = "${profile.name},  ${profile.age}"
+//        eventLocationText.text = profile.location
+        eventDateText.text= System.currentTimeMillis().toString()
         swipeView.alpha = 1f
     }
 
-    @Click(R.id.profileImageView)
+    @Click(R.id.cardSwipeView_Image)
     fun onClick() {
         Log.d("EVENT", "profileImageView click")
     }
@@ -105,7 +59,7 @@ class EventCard(private val context: Context,
     fun onSwipeOutDirectional(direction: SwipeDirection) {
         Log.d("DEBUG", "SwipeOutDirectional " + direction.name)
         if (direction.direction == SwipeDirection.TOP.direction) {
-          //  callback.onSwipeUp()
+            callback.onSwipeUp()
         }
     }
 
@@ -127,25 +81,26 @@ class EventCard(private val context: Context,
 
     @SwipeTouch
     fun onSwipeTouch(xStart: Float, yStart: Float, xCurrent: Float, yCurrent: Float) {
-//        val cardHolderDiagonalLength =
-//            sqrt(Math.pow(cardViewHolderSize.x.toDouble(), 2.0)
-//                    + (Math.pow(cardViewHolderSize.y.toDouble(), 2.0)))
-//        val distance = sqrt(Math.pow(xCurrent.toDouble() - xStart.toDouble(), 2.0)
-//                + (Math.pow(yCurrent.toDouble() - yStart, 2.0)))
-//
-//        val alpha = 1 - distance / cardHolderDiagonalLength
 
-//        Log.d("DEBUG", "onSwipeTouch "
-//                + " xStart : " + xStart
-//                + " yStart : " + yStart
-//                + " xCurrent : " + xCurrent
-//                + " yCurrent : " + yCurrent
-//                + " distance : " + distance
-//                + " TotalLength : " + cardHolderDiagonalLength
-//                + " alpha : " + alpha
-//        )
-//
-//        swipeView.alpha = alpha.toFloat();
+        val cardHolderDiagonalLength =
+            sqrt(Math.pow(cardViewHolderSize.x.toDouble(), 2.0)
+                    + (Math.pow(cardViewHolderSize.y.toDouble(), 2.0)))
+        val distance = sqrt(Math.pow(xCurrent.toDouble() - xStart.toDouble(), 2.0)
+                + (Math.pow(yCurrent.toDouble() - yStart, 2.0)))
+
+        val alpha = 1 - distance / cardHolderDiagonalLength
+
+        Log.d("DEBUG", "onSwipeTouch "
+                + " xStart : " + xStart
+                + " yStart : " + yStart
+                + " xCurrent : " + xCurrent
+                + " yCurrent : " + yCurrent
+                + " distance : " + distance
+                + " TotalLength : " + cardHolderDiagonalLength
+                + " alpha : " + alpha
+        )
+
+        swipeView.alpha = alpha.toFloat();
     }
 
     interface Callback {

@@ -16,6 +16,7 @@ class LoginActivity : AppCompatActivity() {
     lateinit var authListener: FirebaseAuth.AuthStateListener
     private var backButtonCount = 0
 
+
     // Request code for launching the sign in Intent.
     private val RC_SIGN_IN = 1
 
