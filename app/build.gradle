@@ -44,6 +44,9 @@ dependencies {
     implementation 'com.mindorks.android:placeholderview:1.0.3'
     kapt 'com.mindorks.android:placeholderview-compiler:1.0.3'
     implementation 'com.squareup.picasso:picasso:2.71828'
+    implementation 'com.mindorks.android:placeholderview:1.0.3'
+    kapt 'com.mindorks.android:placeholderview-compiler:1.0.3'
+    implementation 'jp.wasabeef:glide-transformations:2.0.2'
 
 }
 apply plugin: 'com.google.gms.google-services'

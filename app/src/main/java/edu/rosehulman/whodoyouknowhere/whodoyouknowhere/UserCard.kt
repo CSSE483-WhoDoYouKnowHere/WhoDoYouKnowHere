@@ -5,13 +5,16 @@ import android.graphics.Point
 import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
+import com.bumptech.glide.Glide
 import com.mindorks.placeholderview.SwipeDirection
 import com.mindorks.placeholderview.annotations.*
 import com.mindorks.placeholderview.annotations.swipe.*
+import jp.wasabeef.glide.transformations.RoundedCornersTransformation
 import kotlin.math.sqrt
 
 @Layout(R.layout.card_user_view)
 class UserCard(private val context: Context,
+               private val list: ArrayList<User>,
                private val cardViewHolderSize: Point,
                private val callback: Callback) {
 
@@ -38,14 +41,16 @@ class UserCard(private val context: Context,
                 context,
                 Utils.dpToPx(7), //7
                 0,
-                RoundedCornersTransformation.CornerType.TOP))
+                RoundedCornersTransformation.CornerType.TOP)
+        )
             .into(profileImageView)
         name.text = locations.name
+        age.text = locations.name
 
         swipeView.alpha = 1f
     }
 
-    @Click(R.id.profileImageView)
+    @Click(R.id.user_image)
     fun onClick() {
         Log.d("EVENT", "profileImageView click")
     }

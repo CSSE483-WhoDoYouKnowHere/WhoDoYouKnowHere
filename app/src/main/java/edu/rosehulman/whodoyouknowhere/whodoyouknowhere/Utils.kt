@@ -53,4 +53,19 @@ object Utils {
     fun dpToPx(dp: Int): Int {
         return (dp * Resources.getSystem().displayMetrics.density).toInt()
     }
+
+    fun getSampleUsers() : ArrayList<User> {
+        val sampleUsers: ArrayList<User> = arrayListOf(
+            User(0, "Anand Desai", 20, "Male",
+                false, 0, ""),
+            User(0, "Alex Dripchak", 20, "Male",
+                false, 0, ""),
+            User(0, "Pee Pee Poo Poo Man", 102903, "Male",
+                false, 0, "")
+
+        )
+        return sampleUsers
+    }
+
+
 }
