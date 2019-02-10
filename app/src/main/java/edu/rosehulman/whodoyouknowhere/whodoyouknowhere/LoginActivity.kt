@@ -14,6 +14,8 @@ class LoginActivity : AppCompatActivity() {
 
     val auth: FirebaseAuth = FirebaseAuth.getInstance()
     lateinit var authListener: FirebaseAuth.AuthStateListener
+    private var backButtonCount = 0
+
 
     // Request code for launching the sign in Intent.
     private val RC_SIGN_IN = 1
@@ -48,6 +50,7 @@ class LoginActivity : AppCompatActivity() {
             Toast.makeText(this, getString(R.string.back_button_exit_toast), Toast.LENGTH_SHORT)
                 .show()
             backButtonCount++
+            super.onBackPressed()
         }
     }
 
@@ -66,6 +69,7 @@ class LoginActivity : AppCompatActivity() {
     private fun switchToMainActivity(uid: String) {
         val intent = Intent(this, MainActivity::class.java)
         intent.putExtra(Constants.UID, uid)
+        finish()
         startActivity(intent)
     }
 

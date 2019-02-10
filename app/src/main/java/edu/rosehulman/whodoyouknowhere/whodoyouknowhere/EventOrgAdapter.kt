@@ -21,6 +21,7 @@ class EventOrgAdapter(val context: Context?, var uid: String) : RecyclerView.Ada
     private val userRef = FirebaseFirestore
         .getInstance()
         .collection(Constants.USERS_COLLECTION)
+//        .document(uid)
 
     //Do we need another events arraylist?-
 
