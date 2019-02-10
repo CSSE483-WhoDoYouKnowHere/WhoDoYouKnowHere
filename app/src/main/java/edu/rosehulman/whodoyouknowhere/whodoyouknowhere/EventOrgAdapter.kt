@@ -21,7 +21,6 @@ class EventOrgAdapter(val context: Context?, var uid: String) : RecyclerView.Ada
     private val userRef = FirebaseFirestore
         .getInstance()
         .collection(Constants.USERS_COLLECTION)
-//        .document(uid)
 
     //Do we need another events arraylist?-
 
@@ -126,6 +125,7 @@ class EventOrgAdapter(val context: Context?, var uid: String) : RecyclerView.Ada
 
     fun add(event: Event) {
         eventsRef.add(event)
+
     }
 
     fun edit(index: Int, title: String, date: String, location: String) {
