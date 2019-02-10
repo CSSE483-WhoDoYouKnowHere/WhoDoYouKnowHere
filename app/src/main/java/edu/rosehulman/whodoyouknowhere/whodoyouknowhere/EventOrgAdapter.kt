@@ -6,11 +6,14 @@ import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.*
 import kotlinx.android.synthetic.main.add_event_dialog.view.*
+import kotlin.collections.ArrayList
 
-class EventOrgAdapter(val context: Context?, val uid: String) : RecyclerView.Adapter<EventOrgViewHolder>() {
+class EventOrgAdapter(val context: Context?, var uid: String) : RecyclerView.Adapter<EventOrgViewHolder>() {
 
+    private val user = FirebaseAuth.getInstance().currentUser
     private var eventsHosted = ArrayList<Event>()
     private val eventsRef = FirebaseFirestore
         .getInstance()
@@ -18,9 +21,28 @@ class EventOrgAdapter(val context: Context?, val uid: String) : RecyclerView.Ada
     private val userRef = FirebaseFirestore
         .getInstance()
         .collection(Constants.USERS_COLLECTION)
-        .document(uid)
+//        .document(uid)
 
-    fun addSnapshotListener() {
+    //Do we need another events arraylist?-
+
+    init {
+        uid = user!!.uid
+        this.addEventSnapshotListener()
+        Log.d(Constants.TAG, "UID is: $uid")
+        userRef.add(uid)
+        userRef.document(uid).get().addOnSuccessListener { snapShot: DocumentSnapshot ->
+            eventsHosted = snapShot.toObject(User::class.java)?.eventsHosting ?: ArrayList<Event>(0)
+            //eventsHosted = snapShot["eventsHosting"] as ArrayList<Event>
+
+            //What I think it happening: there is no user object stored in the user collection so we are getting an empty array
+            //TODO: Fix
+
+
+
+        }
+    }
+
+    fun addEventSnapshotListener() {
         eventsRef.orderBy("timeStamp", Query.Direction.ASCENDING)
             .addSnapshotListener { snapshot, fireStoreException ->
                 if (fireStoreException != null) {
@@ -29,19 +51,16 @@ class EventOrgAdapter(val context: Context?, val uid: String) : RecyclerView.Ada
                 }
 
 //            populateLocalQuotes(snapshot!!)
-                processSnapshotDiffs(snapshot!!)
+                processEventSnapshotDiffs(snapshot!!)
 
             }
     }
 
-    init {
-        this.addSnapshotListener()
-        userRef.get().addOnSuccessListener { snapShot : DocumentSnapshot ->
-            eventsHosted = snapShot["eventsHosting"] as ArrayList<Event>
-        }
-    }
+//    fun addUserSnapshotListener()
 
-    private fun processSnapshotDiffs(snapshot: QuerySnapshot) {
+
+
+    private fun processEventSnapshotDiffs(snapshot: QuerySnapshot) {
         for (docChange in snapshot.documentChanges) {
             val event = Event.fromSnapshot(docChange.document)
             when (docChange.type) {

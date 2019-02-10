@@ -41,7 +41,8 @@ class LoginActivity : AppCompatActivity() {
         super.onBackPressed()
         if (backButtonCount >= 1 && auth.currentUser == null) {
             finish()
-        } else {
+        }
+         else {
             Toast.makeText(this, getString(R.string.back_button_exit_toast), Toast.LENGTH_SHORT)
                 .show()
             backButtonCount++

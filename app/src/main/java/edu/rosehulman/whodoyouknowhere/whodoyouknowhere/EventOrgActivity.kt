@@ -20,7 +20,7 @@ import kotlinx.android.synthetic.main.add_event_dialog.view.*
 import kotlinx.android.synthetic.main.app_bar_event_org.*
 import java.util.*
 
-class EventOrgActivity(val uid : String) : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
+class EventOrgActivity(val uid : String="") : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
     private lateinit var eventOrgAdapter: EventOrgAdapter
     private lateinit var recyclerView: RecyclerView
