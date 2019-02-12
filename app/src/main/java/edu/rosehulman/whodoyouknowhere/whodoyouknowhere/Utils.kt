@@ -5,12 +5,10 @@ import android.graphics.Point
 import android.os.Build
 import android.util.DisplayMetrics
 import android.view.WindowManager
-import java.util.*
-import kotlin.collections.ArrayList
 
 object Utils {
 
-    fun getSampleEvents(): Event {
+    fun getSampleEvents(): ArrayList<Event> {
         val sampleEvents: ArrayList<Event> = arrayListOf(
             Event(
                 0, "Title1", "1/12/19", "Olympus Mons,Mars", "An arduous journey",
@@ -31,7 +29,7 @@ object Utils {
                 0, ArrayList<User>(0)
             )
         )
-        return sampleEvents.random()
+        return sampleEvents
     }
 
     fun getDisplaySize(windowManager: WindowManager): Point {

@@ -1,17 +1,18 @@
 package edu.rosehulman.whodoyouknowhere.whodoyouknowhere
 
 import android.content.Context
+import android.support.v4.app.FragmentActivity
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.*
+import com.google.firebase.firestore.DocumentChange
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.QuerySnapshot
 import kotlinx.android.synthetic.main.add_event_dialog.view.*
-import kotlin.collections.ArrayList
-import android.R.attr.fragment
-import android.support.v4.app.FragmentActivity
 
 
 class EventOrgAdapter(val context: Context?, var uid: String) : RecyclerView.Adapter<EventOrgViewHolder>() {
@@ -167,7 +168,7 @@ class EventOrgAdapter(val context: Context?, var uid: String) : RecyclerView.Ada
 
         val users = eventsHosted[index].attendeeList
         val ft = (context as FragmentActivity).supportFragmentManager.beginTransaction()
-        ft.replace(R.id.fragment_container, AttendeeListFragment(users), "attendeeList")
+        ft.replace(R.id.fragment_container, AttendeeListFragment(), "attendeeList")
         ft.addToBackStack("attendeeList")
         ft.commit()
     }

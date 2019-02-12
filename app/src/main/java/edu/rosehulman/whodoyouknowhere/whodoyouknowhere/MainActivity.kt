@@ -2,9 +2,11 @@ package edu.rosehulman.whodoyouknowhere.whodoyouknowhere
 
 import android.app.DatePickerDialog
 import android.content.Intent
+import android.graphics.Point
 import android.os.Bundle
+import android.support.annotation.NonNull
+import android.support.design.widget.BottomNavigationView
 import android.support.design.widget.NavigationView
-import android.support.design.widget.Snackbar
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBarDrawerToggle
@@ -14,24 +16,27 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
+import android.view.*
 import android.widget.Toast
 import com.google.android.gms.tasks.OnCompleteListener
+import com.google.android.gms.tasks.Task
+import com.google.firebase.auth.AuthResult
+import com.google.firebase.auth.EmailAuthCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
+import com.mindorks.placeholderview.SwipeDecor
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.add_user_dialog.view.*
 import kotlinx.android.synthetic.main.app_bar_main.*
+import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.android.synthetic.main.nav_header_main.view.*
 import java.util.*
 import kotlin.collections.ArrayList
 
 
-class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
+class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener,
+    BottomNavigationView.OnNavigationItemSelectedListener {
 
     private lateinit var mItemTouchHelper: ItemTouchHelper
     private lateinit var recyclerView: RecyclerView
@@ -42,16 +47,18 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     lateinit var authListener: FirebaseAuth.AuthStateListener
     private var uid: String? = null
     private var backButtonCount = 0
-    private val ageMinimum =18
-    //  private lateinit var mSwipeView: SwipeView
+    private val ageMinimum = 18
     private val userRef = FirebaseFirestore
         .getInstance()
         .collection(Constants.USERS_COLLECTION)
 
-    init {
-        uid = user!!.uid
-        //this.addUserSnapshotListener()
+    private  val margin  = 160 //160
+    private val animationDuration = 300
+    private var isToUndo = false
 
+    init {
+
+        uid = user!!.uid
         userRef.whereEqualTo("id", uid)
             .limit(1).get()
             .addOnCompleteListener(OnCompleteListener<QuerySnapshot> { task ->
@@ -65,75 +72,103 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             })
     }
 
-    fun addUser() {
-        var builder = AlertDialog.Builder(this)
-        builder.setTitle(getString(R.string.user_profile_dialog_title))
-        val view = LayoutInflater.from(this).inflate(R.layout.add_user_dialog, null, false)
-        builder.setView(view)
-
-        val userId= uid.toString()
-        val name = view.user_name_edit_text.text.toString()
-        val sexSpinner = view.sex_drop_down
-
-        val dateButton = view.select_date_button
-        val age: Int =9
-        dateButton.setOnClickListener {
-            val now = Calendar.getInstance()
-            val datePicker= DatePickerDialog(this,DatePickerDialog.OnDateSetListener{picker,year, month, day ->
-                picker
-            }, now[Calendar.YEAR-ageMinimum],now[Calendar.MONTH],now[Calendar.DATE])
-            datePicker.show()
-        }
 
 
-
-        var user = User(userId,name,age,"male",0,"gsoignsigs", ArrayList())
-        userRef.add(user)
-        builder.create().show()
-    }
-
-    override fun onStart() {
-        super.onStart()
-        auth.addAuthStateListener(authListener)
-    }
-
-    override fun onStop() {
-        super.onStop()
-        auth.removeAuthStateListener(authListener)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //setContentView(R.layout.activity_main)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
+
+        bottom_nav_view.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
+
+
+        val completeListener = OnCompleteListener<AuthResult> {
+
+            @NonNull
+            fun onComplete(task:  Task<AuthResult> ) {
+                if (task.isSuccessful()) {
+                    var  isNew = task.result?.additionalUserInfo?.isNewUser
+                    Log.d("MyTAG", "onComplete: $isNew")
+                }
+            }
+        }
+
+        val s=  FirebaseAuth.getInstance().getAccessToken(true)
+
+        EmailAuthCredential.get()
+        auth.signInWithCredential()
+
+
+        setupSwipeView()
+        initializeListeners()
 
         val extras = intent.extras
         if (extras != null) {
             uid = extras.getString(Constants.UID)
         }
-        viewManager = LinearLayoutManager(this)
-        eventAdapter = EventAdapter(this, viewManager)
 
-        recyclerView = findViewById<RecyclerView>(R.id.event_recycler_view).apply {
+        val bottomMargin = Utils.dpToPx(margin)
+        val windowSize = Utils.getDisplaySize(windowManager)
+        swipeView!!.builder
+            .setDisplayViewCount(3)
+            .setIsUndoEnabled(true)
+            .setSwipeVerticalThreshold(Utils.dpToPx(50))
+            .setSwipeHorizontalThreshold(Utils.dpToPx(50))
+            .setHeightSwipeDistFactor(10f)
+            .setWidthSwipeDistFactor(5f)
+            .setSwipeDecor(
+                SwipeDecor()
+                    .setViewWidth(windowSize.x)
+                    .setViewHeight(windowSize.y - bottomMargin)
+                    .setViewGravity(Gravity.TOP)
+                    .setPaddingTop(20)
+                    .setSwipeAnimTime(animationDuration)
+                    .setRelativeScale(0.01f)
+                    .setSwipeInMsgLayoutId(R.layout.card_event_swipe_in)
+                    .setSwipeOutMsgLayoutId(R.layout.card_event_swipe_out))
 
-            setHasFixedSize(true)
 
-            layoutManager = viewManager
+        val cardViewHolderSize = Point(windowSize.x, windowSize.y - bottomMargin)
 
-            adapter = eventAdapter
-
+        for (event in Utils.getSampleEvents()) {
+            swipeView!!.addView(EventCard(this,event,cardViewHolderSize))
         }
 
-        val callback = SimpleItemTouchHelperCallback(eventAdapter)
-        mItemTouchHelper = ItemTouchHelper(callback)
-        mItemTouchHelper.attachToRecyclerView(recyclerView)
+        rejectBtn.setOnClickListener({ swipeView!!.doSwipe(false) })
 
+        acceptBtn.setOnClickListener({ swipeView!!.doSwipe(true) })
 
-        fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show()
+        undoBtn.setOnClickListener({ swipeView!!.undoLastSwipe() })
+
+        swipeView!!.addItemRemoveListener {
+            if (isToUndo) {
+                isToUndo = false
+                swipeView!!.undoLastSwipe()
+            }
         }
+//        viewManager = LinearLayoutManager(this)
+//        eventAdapter = EventAdapter(this, viewManager)
+//
+//        recyclerView = findViewById<RecyclerView>(R.id.event_recycler_view).apply {
+//
+//            setHasFixedSize(true)
+//
+//            layoutManager = viewManager
+//
+//            adapter = eventAdapter
+//
+//        }
+//
+//        val callback = SimpleItemTouchHelperCallback(eventAdapter)
+//        mItemTouchHelper = ItemTouchHelper(callback)
+//        mItemTouchHelper.attachToRecyclerView(recyclerView)
+
+        fab.hide()
+//        fab.setOnClickListener { view ->
+//            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                .setAction("Action", null).show()
+//        }
 
         val toggle = ActionBarDrawerToggle(
             this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
@@ -164,11 +199,47 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     //do nothing
                 }
             })
-        setupSwipeView()
-        initializeListeners()
         toggle.syncState()
         nav_view.setNavigationItemSelectedListener(this)
     }
+
+    fun addUser() {
+        var builder = AlertDialog.Builder(this)
+        builder.setTitle(getString(R.string.user_profile_dialog_title))
+        val view = LayoutInflater.from(this).inflate(R.layout.add_user_dialog, null, false)
+        builder.setView(view)
+
+        val userId = uid.toString()
+        val name = view.user_name_edit_text.text.toString()
+        val sexSpinner = view.sex_drop_down
+
+        val dateButton = view.select_date_button
+        val age: Int = 9
+        dateButton.setOnClickListener {
+            val now = Calendar.getInstance()
+            val datePicker = DatePickerDialog(this, DatePickerDialog.OnDateSetListener { picker, year, month, day ->
+                picker
+            }, now[Calendar.YEAR - ageMinimum], now[Calendar.MONTH], now[Calendar.DATE])
+            datePicker.show()
+        }
+
+
+        var user = User(userId, name, age, "male", 0, "gsoignsigs", ArrayList())
+        userRef.add(user)
+        builder.create().show()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        auth.addAuthStateListener(authListener)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        auth.removeAuthStateListener(authListener)
+    }
+
+
 
     private fun initializeListeners() {
         authListener = FirebaseAuth.AuthStateListener { auth: FirebaseAuth ->
@@ -216,6 +287,25 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             R.id.action_settings -> return true
             else -> return super.onOptionsItemSelected(item)
         }
+    }
+
+    private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
+        when (item.itemId) {
+            R.id.bottom_nav_event_org -> {
+                startEventOrgActivity(uid!!)
+
+                return@OnNavigationItemSelectedListener true
+            }
+            R.id.bottom_nav_home -> {
+
+                return@OnNavigationItemSelectedListener true
+            }
+            R.id.bottom_nav_messages -> {
+
+                return@OnNavigationItemSelectedListener true
+            }
+        }
+        false
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
