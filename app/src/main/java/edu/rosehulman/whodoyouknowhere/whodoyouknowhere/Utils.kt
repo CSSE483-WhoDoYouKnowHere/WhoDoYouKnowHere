@@ -6,6 +6,7 @@ import android.os.Build
 import android.util.DisplayMetrics
 import android.view.WindowManager
 import java.util.*
+import kotlin.collections.ArrayList
 
 object Utils {
 
@@ -56,12 +57,15 @@ object Utils {
 
     fun getSampleUsers() : ArrayList<User> {
         val sampleUsers: ArrayList<User> = arrayListOf(
-            User(0, "Anand Desai", 20, "Male",
-                false, 0, ""),
-            User(0, "Alex Dripchak", 20, "Male",
-                false, 0, ""),
-            User(0, "Pee Pee Poo Poo Man", 102903, "Male",
-                false, 0, "")
+            User("d", "Anand Desai", 20, "Male",
+                0, "description is nothing", ArrayList()
+            ),
+            User("fds", "Joshua Eckels", 20, "Male",
+                0, "description is nothing", ArrayList()
+            ),
+            User("ds", "Alex Dripchak", 20, "Male",
+                0, "description is nothing", ArrayList()
+            )
 
         )
         return sampleUsers

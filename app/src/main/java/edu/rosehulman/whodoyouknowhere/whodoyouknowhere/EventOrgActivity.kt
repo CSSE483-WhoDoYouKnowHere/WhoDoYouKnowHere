@@ -12,7 +12,8 @@ import android.view.MenuItem
 import kotlinx.android.synthetic.main.activity_event_org.*
 import kotlinx.android.synthetic.main.app_bar_event_org.*
 
-class EventOrgActivity(val uid : String="") : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
+class EventOrgActivity(val uid : String="") : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener,AttendeeListFragment.OnEventHostedSelectedListener {
+
 
     private lateinit var eventOrgAdapter: EventOrgAdapter
     private lateinit var recyclerView: RecyclerView
@@ -105,5 +106,13 @@ class EventOrgActivity(val uid : String="") : AppCompatActivity(), NavigationVie
 
         drawer_layout.closeDrawer(GravityCompat.START)
         return true
+    }
+
+    override fun onEventHostedSelectedListener(event: Event) {
+
+        val ft = supportFragmentManager.beginTransaction()
+        ft.replace(R.id.fragment_container,AttendeeListFragment(),"attendeeList")
+        ft.addToBackStack("attendeeList")
+        ft.commit()
     }
 }

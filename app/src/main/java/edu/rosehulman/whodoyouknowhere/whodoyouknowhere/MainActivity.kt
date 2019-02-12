@@ -28,6 +28,7 @@ import kotlinx.android.synthetic.main.add_user_dialog.view.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.nav_header_main.view.*
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
@@ -70,12 +71,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val view = LayoutInflater.from(this).inflate(R.layout.add_user_dialog, null, false)
         builder.setView(view)
 
-        val userId= uid
-        val name = view.user_name_edit_text
+        val userId= uid.toString()
+        val name = view.user_name_edit_text.text.toString()
         val sexSpinner = view.sex_drop_down
 
         val dateButton = view.select_date_button
-        val age: Int
+        val age: Int =9
         dateButton.setOnClickListener {
             val now = Calendar.getInstance()
             val datePicker= DatePickerDialog(this,DatePickerDialog.OnDateSetListener{picker,year, month, day ->
@@ -86,9 +87,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
 
 
-      //  var user = User(userId,name,age,sex,)
-      //  userRef.add(user)
-
+        var user = User(userId,name,age,"male",0,"gsoignsigs", ArrayList())
+        userRef.add(user)
         builder.create().show()
     }
 

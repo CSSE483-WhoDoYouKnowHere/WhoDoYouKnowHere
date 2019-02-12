@@ -10,6 +10,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.*
 import kotlinx.android.synthetic.main.add_event_dialog.view.*
 import kotlin.collections.ArrayList
+import android.R.attr.fragment
+import android.support.v4.app.FragmentActivity
+
 
 class EventOrgAdapter(val context: Context?, var uid: String) : RecyclerView.Adapter<EventOrgViewHolder>() {
 
@@ -29,17 +32,12 @@ class EventOrgAdapter(val context: Context?, var uid: String) : RecyclerView.Ada
         uid = user!!.uid
         this.addEventSnapshotListener()
         Log.d(Constants.TAG, "UID is: $uid")
-        userRef.add(uid)
-        userRef.document(uid).get().addOnSuccessListener { snapShot: DocumentSnapshot ->
-            eventsHosted = snapShot.toObject(User::class.java)?.eventsHosting ?: ArrayList<Event>(0)
-            //eventsHosted = snapShot["eventsHosting"] as ArrayList<Event>
-
-            //What I think it happening: there is no user object stored in the user collection so we are getting an empty array
-            //TODO: Fix
-
-
-
-        }
+        //userRef.add(uid)
+//        userRef.document(uid).get().addOnSuccessListener { snapShot: DocumentSnapshot ->
+//            eventsHosted = snapShot.toObject(User::class.java)?.eventsHosting ?: ArrayList<Event>(0)
+//            //What I think it happening: there is no user object stored in the user collection so we are getting an empty array
+//            //TODO: Fix
+//        }
     }
 
     fun addEventSnapshotListener() {
@@ -57,7 +55,6 @@ class EventOrgAdapter(val context: Context?, var uid: String) : RecyclerView.Ada
     }
 
 //    fun addUserSnapshotListener()
-
 
 
     private fun processEventSnapshotDiffs(snapshot: QuerySnapshot) {
@@ -164,6 +161,15 @@ class EventOrgAdapter(val context: Context?, var uid: String) : RecyclerView.Ada
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EventOrgViewHolder {
         val view = LayoutInflater.from(context).inflate(R.layout.card_event_view, parent, false)
         return EventOrgViewHolder(view, this, context!!)
+    }
+
+    fun selectEventHosted(index: Int) {
+
+        val users = eventsHosted[index].attendeeList
+        val ft = (context as FragmentActivity).supportFragmentManager.beginTransaction()
+        ft.replace(R.id.fragment_container, AttendeeListFragment(users), "attendeeList")
+        ft.addToBackStack("attendeeList")
+        ft.commit()
     }
 
 

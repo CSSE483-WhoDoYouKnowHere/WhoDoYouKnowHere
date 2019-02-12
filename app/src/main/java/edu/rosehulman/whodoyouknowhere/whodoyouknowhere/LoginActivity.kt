@@ -40,13 +40,10 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         super.onBackPressed()
-        var backButtonCount = 0
-        if (backButtonCount >= 1) {
-            val intent = Intent(Intent.ACTION_MAIN)
-            intent.addCategory(Intent.CATEGORY_HOME)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            startActivity(intent)
-        } else {
+        if (backButtonCount >= 1 && auth.currentUser == null) {
+            finish()
+        }
+         else {
             Toast.makeText(this, getString(R.string.back_button_exit_toast), Toast.LENGTH_SHORT)
                 .show()
             backButtonCount++

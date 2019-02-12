@@ -13,8 +13,7 @@ import jp.wasabeef.glide.transformations.RoundedCornersTransformation
 import kotlin.math.sqrt
 
 @Layout(R.layout.card_user_view)
-class UserCard(private val context: Context,
-               private val list: ArrayList<User>,
+class UserCard(private val user: User,
                private val cardViewHolderSize: Point,
                private val callback: Callback) {
 
@@ -36,16 +35,19 @@ class UserCard(private val context: Context,
 
     @Resolve
     fun onResolved() {
-        Glide.with(context).load(locations.picture).bitmapTransform(
-            RoundedCornersTransformation(
-                context,
-                Utils.dpToPx(7), //7
-                0,
-                RoundedCornersTransformation.CornerType.TOP)
-        )
-            .into(profileImageView)
-        name.text = locations.name
-        age.text = locations.name
+
+//        TODO: Give Users pictures :-)
+//
+//        Glide.with(context).load(user.picture).bitmapTransform(
+//            RoundedCornersTransformation(
+//                context,
+//                Utils.dpToPx(7), //7
+//                0,
+//                RoundedCornersTransformation.CornerType.TOP)
+//        )
+//            .into(profileImageView)
+        name.text = user.fullName
+        age.text = user.age.toString()
 
         swipeView.alpha = 1f
     }

@@ -18,6 +18,11 @@ class EventOrgViewHolder(itemView: View, val adapter: EventOrgAdapter, val conte
         itemView.setOnClickListener {
             adapter.showAddEditDialog(adapterPosition)
         }
+        itemView.setOnLongClickListener{
+            adapter.selectEventHosted(adapterPosition)
+            true
+
+        }
     }
 
     fun bind(event: Event) {

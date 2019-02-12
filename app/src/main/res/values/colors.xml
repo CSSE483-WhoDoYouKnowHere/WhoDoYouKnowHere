@@ -12,5 +12,4 @@
     <color name="loginGradientStart">#13A89E</color>
     <color name="loginGradientEnd">#6FCF97</color>
     <color name="loginGradientMid">#27B19C</color>
-    <color name="white">#FFF</color>
 </resources>

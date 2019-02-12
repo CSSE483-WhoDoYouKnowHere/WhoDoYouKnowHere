@@ -2,8 +2,11 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
              android:layout_width="match_parent"
              android:layout_height="match_parent"
-             android:background="@color/grey"
-             android:orientation="vertical">
+             android:background="@android:color/darker_gray"
+             android:orientation="vertical"
+
+             android:id="@+id/fragment_container"
+>
 
     <LinearLayout
             android:layout_width="match_parent"
@@ -16,14 +19,14 @@
                 android:id="@+id/rejectBtn"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:background="@drawable/ic_cancel" />
+                android:background="@drawable/ic_add_white_24dp" />
 
         <ImageButton
                 android:id="@+id/acceptBtn"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:layout_marginLeft="30dp"
-                android:background="@drawable/ic_heart" />
+                android:background="@drawable/ic_account_circle" />
 
         <ImageButton
                 android:id="@+id/undoBtn"
