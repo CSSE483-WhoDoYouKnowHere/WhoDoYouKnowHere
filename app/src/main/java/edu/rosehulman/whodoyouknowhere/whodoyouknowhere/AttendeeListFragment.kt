@@ -2,9 +2,10 @@ package edu.rosehulman.whodoyouknowhere.whodoyouknowhere
 
 import android.content.Context
 import android.graphics.Point
-import android.net.Uri
 import android.os.Bundle
+import android.os.Parcelable
 import android.support.v4.app.Fragment
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -26,6 +27,9 @@ import kotlinx.android.synthetic.main.fragment_attendee_list.*
  * create an instance of this fragment.
  *
  */
+
+private const val ARG_USERS = "users"
+
 class AttendeeListFragment : Fragment() {
     // TODO: Rename and change types of parameters
 //    private var param1: String? = null
@@ -34,13 +38,14 @@ class AttendeeListFragment : Fragment() {
     private  val margin  = 160 //160
     private val animationDuration = 300
     private var isToUndo = false
+    private lateinit var usersList: ArrayList<User>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        arguments?.let {
-//            param1 = it.getString(ARG_PARAM1)
-//            param2 = it.getString(ARG_PARAM2)
-//        }
+        arguments?.let {
+            val test : Bundle = it.getParcelable(ARG_USERS)
+            Log.d(Constants.TAG,"fragment has : $test of type ")
+        }
     }
 
     override fun onCreateView(
@@ -120,14 +125,14 @@ class AttendeeListFragment : Fragment() {
         fun onEventHostedSelectedListener(event: Event)
     }
 
-//    companion object {
-//        @JvmStatic
-//        fun newInstance(param1: String, param2: String) =
-//            AttendeeListFragment().apply {
-//                arguments = Bundle().apply {
-//                    putString(ARG_PARAM1, param1)
-//                    putString(ARG_PARAM2, param2)
-//                }
-//            }
-//    }
+    companion object {
+
+        @JvmStatic
+        fun newInstance(users: Bundle) =
+            AttendeeListFragment().apply {
+                arguments = Bundle().apply {
+                    putParcelable(Constants.ARG_USERS, users)
+                }
+            }
+    }
 }

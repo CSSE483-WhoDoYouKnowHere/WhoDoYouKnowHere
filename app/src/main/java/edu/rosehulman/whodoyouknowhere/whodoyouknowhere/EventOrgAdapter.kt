@@ -11,6 +11,7 @@ import com.google.firebase.firestore.*
 import kotlinx.android.synthetic.main.add_event_dialog.view.*
 import kotlin.collections.ArrayList
 import android.R.attr.fragment
+import android.os.Bundle
 import android.support.v4.app.FragmentActivity
 
 
@@ -164,10 +165,11 @@ class EventOrgAdapter(val context: Context?, var uid: String) : RecyclerView.Ada
     }
 
     fun selectEventHosted(index: Int) {
-
         val users = eventsHosted[index].attendeeList
+        val bundle = Bundle()
+        bundle.putParcelableArrayList(Constants.ARG_USERS, users)
         val ft = (context as FragmentActivity).supportFragmentManager.beginTransaction()
-        ft.replace(R.id.fragment_container, AttendeeListFragment(users), "attendeeList")
+        ft.replace(R.id.fragment_container, AttendeeListFragment.newInstance(bundle), "attendeeList")
         ft.addToBackStack("attendeeList")
         ft.commit()
     }
