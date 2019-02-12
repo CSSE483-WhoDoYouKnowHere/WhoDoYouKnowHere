@@ -2,7 +2,6 @@ package edu.rosehulman.whodoyouknowhere.whodoyouknowhere
 
 import android.content.Context
 import android.graphics.Point
-import android.provider.ContactsContract
 import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
@@ -13,10 +12,10 @@ import kotlin.math.sqrt
 
 
 @Layout(R.layout.card_event_swipe_view)
-class TinderCard(private val context: Context,
-                 private val profile: ContactsContract.Profile,
-                 private val cardViewHolderSize: Point,
-                 private val callback: Callback) {
+class EventCard(private val context: Context,
+                 private val event: Event,
+                 private val cardViewHolderSize: Point
+                ) {
 
     @View(R.id.cardSwipeView_Image)
     lateinit var profileImageView: ImageView
@@ -45,7 +44,8 @@ class TinderCard(private val context: Context,
 //            .centerInside()
 //            .into(profileImageView)
 //        eventNameText.text = "${profile.name},  ${profile.age}"
-//        eventLocationText.text = profile.location
+        eventNameText.text=event.title
+        eventLocationText.text = event.location
         eventDateText.text= System.currentTimeMillis().toString()
         swipeView.alpha = 1f
     }
@@ -58,9 +58,7 @@ class TinderCard(private val context: Context,
     @SwipeOutDirectional
     fun onSwipeOutDirectional(direction: SwipeDirection) {
         Log.d("DEBUG", "SwipeOutDirectional " + direction.name)
-        if (direction.direction == SwipeDirection.TOP.direction) {
-            callback.onSwipeUp()
-        }
+
     }
 
     @SwipeCancelState
@@ -103,7 +101,5 @@ class TinderCard(private val context: Context,
         swipeView.alpha = alpha.toFloat();
     }
 
-    interface Callback {
-        fun onSwipeUp()
-    }
+
 }

@@ -53,6 +53,8 @@ class AttendeeListFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
 
+        val detailView = inflater.inflate(R.layout.fragment_attendee_list, container, false)
+
         val bottomMargin = Utils.dpToPx(margin)
         val windowSize = Utils.getDisplaySize(activity!!.windowManager)
         swipe_on_user!!.builder
@@ -92,7 +94,7 @@ class AttendeeListFragment : Fragment() {
                 swipe_on_user!!.undoLastSwipe()
             }
         }
-        return inflater.inflate(R.layout.fragment_attendee_list, container, false)
+        return detailView
     }
 
     override fun onAttach(context: Context) {
