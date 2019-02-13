@@ -4,7 +4,6 @@ import android.app.DatePickerDialog
 import android.content.Intent
 import android.graphics.Point
 import android.os.Bundle
-import android.support.annotation.NonNull
 import android.support.design.widget.BottomNavigationView
 import android.support.design.widget.NavigationView
 import android.support.v4.view.GravityCompat
@@ -18,13 +17,8 @@ import android.support.v7.widget.helper.ItemTouchHelper
 import android.util.Log
 import android.view.*
 import android.widget.Toast
-import com.google.android.gms.tasks.OnCompleteListener
-import com.google.android.gms.tasks.Task
-import com.google.firebase.auth.AuthResult
-import com.google.firebase.auth.EmailAuthCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.QuerySnapshot
 import com.mindorks.placeholderview.SwipeDecor
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.add_user_dialog.view.*
@@ -42,8 +36,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private lateinit var recyclerView: RecyclerView
     private lateinit var eventAdapter: EventAdapter
     private lateinit var viewManager: LinearLayoutManager
+    private var isNewUser = false
+
+    private val margin = 160 //160
+    private val animationDuration = 300
+    private var isToUndo = false
+
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val user = auth.currentUser
+
     lateinit var authListener: FirebaseAuth.AuthStateListener
     private var uid: String? = null
     private var backButtonCount = 0
@@ -52,27 +53,20 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         .getInstance()
         .collection(Constants.USERS_COLLECTION)
 
-    private  val margin  = 160 //160
-    private val animationDuration = 300
-    private var isToUndo = false
 
     init {
 
-        uid = user!!.uid
-        userRef.whereEqualTo("id", uid)
-            .limit(1).get()
-            .addOnCompleteListener(OnCompleteListener<QuerySnapshot> { task ->
-                if (task.isSuccessful) {
-                    Log.d(Constants.TAG, "User exists with UID: $uid")
-                    val isEmpty = task.result!!.isEmpty
-                } else {
-                    Log.d(Constants.TAG, "User does not exist. UID: $uid \nProceeding to add User object to Firebase")
-                    addUser()
-                }
-            })
+        val currentUser = user!!.metadata
+        isNewUser = currentUser!!.creationTimestamp == currentUser.lastSignInTimestamp
+
+        if (isNewUser) {
+            Log.d(Constants.TAG, "New User $currentUser detected. Launching User Profile Dialog")
+            launchUserProfileDialog()
+        } else {
+            Log.d(Constants.TAG, "Existing User $currentUser detected.")
+        }
+
     }
-
-
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -82,25 +76,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         bottom_nav_view.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
 
-
-        val completeListener = OnCompleteListener<AuthResult> {
-
-            @NonNull
-            fun onComplete(task:  Task<AuthResult> ) {
-                if (task.isSuccessful()) {
-                    var  isNew = task.result?.additionalUserInfo?.isNewUser
-                    Log.d("MyTAG", "onComplete: $isNew")
-                }
-            }
-        }
-
-        val s=  FirebaseAuth.getInstance().getAccessToken(true)
-
-        EmailAuthCredential.get()
-        auth.signInWithCredential()
-
-
-        setupSwipeView()
         initializeListeners()
 
         val extras = intent.extras
@@ -126,13 +101,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     .setSwipeAnimTime(animationDuration)
                     .setRelativeScale(0.01f)
                     .setSwipeInMsgLayoutId(R.layout.card_event_swipe_in)
-                    .setSwipeOutMsgLayoutId(R.layout.card_event_swipe_out))
+                    .setSwipeOutMsgLayoutId(R.layout.card_event_swipe_out)
+            )
 
 
         val cardViewHolderSize = Point(windowSize.x, windowSize.y - bottomMargin)
 
         for (event in Utils.getSampleEvents()) {
-            swipeView!!.addView(EventCard(this,event,cardViewHolderSize))
+            swipeView!!.addView(EventCard(this, event, cardViewHolderSize))
         }
 
         rejectBtn.setOnClickListener({ swipeView!!.doSwipe(false) })
@@ -203,7 +179,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         nav_view.setNavigationItemSelectedListener(this)
     }
 
-    fun addUser() {
+    fun launchUserProfileDialog() {
         var builder = AlertDialog.Builder(this)
         builder.setTitle(getString(R.string.user_profile_dialog_title))
         val view = LayoutInflater.from(this).inflate(R.layout.add_user_dialog, null, false)
@@ -238,7 +214,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         super.onStop()
         auth.removeAuthStateListener(authListener)
     }
-
 
 
     private fun initializeListeners() {
@@ -337,7 +312,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private fun startEventOrgActivity(uid: String) {
         val intent = Intent(this, EventOrgActivity(uid)::class.java)
-        //intent.putExtra("something", true)
         startActivity(intent)
         finish()
     }
