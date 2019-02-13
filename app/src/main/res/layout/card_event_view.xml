@@ -19,7 +19,7 @@
         <ImageView
                 android:layout_width="100dp"
                 android:layout_height="100dp"
-                android:id="@+id/picture"
+                android:id="@+id/event_org_image"
                 android:layout_alignParentLeft="true"
                 android:scaleType="fitCenter"
                 android:layout_marginLeft="5dp"
@@ -34,7 +34,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/event_name_text_view"
-                android:layout_toRightOf="@id/picture"
+                android:layout_toRightOf="@id/event_org_image"
                 android:textSize="20sp"
         />
 
@@ -43,7 +43,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/event_date_text_view"
-                android:layout_toRightOf="@id/picture"
+                android:layout_toRightOf="@id/event_org_image"
                 android:layout_below="@id/event_name_text_view"
                 android:textSize="20sp"
         />
@@ -52,7 +52,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/event_location_text_view"
-                android:layout_toRightOf="@id/picture"
+                android:layout_toRightOf="@id/event_org_image"
                 android:layout_below="@id/event_date_text_view"
                 android:textSize="20sp"
         />

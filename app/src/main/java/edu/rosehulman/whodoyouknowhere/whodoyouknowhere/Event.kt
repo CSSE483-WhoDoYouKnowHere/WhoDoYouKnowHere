@@ -11,6 +11,7 @@ data class Event(
     var title: String = "Title",
     var date: String = "1/12/19",
     var location: String = "Olympus Mons,Mars",
+    var picUrl : String = "",
     var description: String = "A fun get-together!",
     var ageRestriction: Boolean = false,
     var eventType: String = "Party",
@@ -20,6 +21,7 @@ data class Event(
     var applicantList: ArrayList<User> = ArrayList(0),
     var acceptedList: ArrayList<User> = ArrayList(0),
     var deniedList: ArrayList<User> = ArrayList(0)
+
 ) : Parcelable {
 
 
@@ -30,6 +32,7 @@ data class Event(
 
     constructor(parcel: Parcel) : this(
         parcel.readInt(),
+        parcel.readString(),
         parcel.readString(),
         parcel.readString(),
         parcel.readString(),
@@ -72,6 +75,7 @@ data class Event(
         parcel.writeString(title)
         parcel.writeString(date)
         parcel.writeString(location)
+        parcel.writeString(picUrl)
         parcel.writeString(description)
         parcel.writeByte(if (ageRestriction) 1 else 0)
         parcel.writeString(eventType)

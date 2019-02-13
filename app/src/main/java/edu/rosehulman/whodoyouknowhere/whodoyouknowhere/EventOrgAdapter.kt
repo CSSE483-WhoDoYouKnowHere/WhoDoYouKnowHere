@@ -10,7 +10,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
+import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.add_event_dialog.view.*
+import kotlinx.android.synthetic.main.card_user_view.view.*
 
 
 class EventOrgAdapter(
@@ -84,30 +86,32 @@ class EventOrgAdapter(
 
 
     fun showAddEditDialog(index: Int = -1) {
+        var picUrl = ""
         val builder = AlertDialog.Builder(context!!)
         //Configure the builder: title, icon, message/custom view OR list.  Buttons (pos, neg, neutral)
         builder.setTitle("Add an event")
-        //TODO:
         val view = LayoutInflater.from(context).inflate(R.layout.add_event_dialog, null, false)
         builder.setView(view)
 
-        // TODO: If editing, pre-populate the edit texts (like Jersey)
         if (index >= 0) {
             //Edit
             builder.setTitle("Edit this event")
             view.add_name_edit_text.setText(eventsHosted[index].title) //Type of text is editable, not a string
             view.add_date_edit_text.setText(eventsHosted[index].date)
             view.add_location_edit_text.setText(eventsHosted[index].location)
+            view.add_picture_edit_text.setText(eventsHosted[index].picUrl)
         }
 
         builder.setPositiveButton(android.R.string.ok, { _, _ ->
             val title = view.add_name_edit_text.text.toString()
             val date = view.add_date_edit_text.text.toString()
             val location = view.add_location_edit_text.text.toString()
+            picUrl = view.add_picture_edit_text.text.toString()
             if (index >= 0) {
                 edit(index, title, date, location)
             } else {
-                add(Event(0, title, date, location))
+                add(Event(0, title, date, location, picUrl))
+
             }
 
         })

@@ -1,5 +1,6 @@
 package edu.rosehulman.whodoyouknowhere.whodoyouknowhere
 
+import android.app.Fragment
 import android.content.Intent
 import android.graphics.Point
 import android.os.Bundle
@@ -290,6 +291,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
+        var fragment: android.support.v4.app.Fragment
         when (item.itemId) {
             R.id.bottom_nav_event_org -> {
                 // startEventOrgActivity(uid!!)
@@ -299,13 +301,18 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 return@OnNavigationItemSelectedListener true
             }
             R.id.bottom_nav_home -> {
-
+                fragment = supportFragmentManager.findFragmentByTag(Constants.EVENT_ORG_FRAGMENT)
+                if (fragment != null) {
+                    supportFragmentManager.beginTransaction().detach(fragment).commit()
+                    fab.hide()
+                    return@OnNavigationItemSelectedListener true
+                }
                 return@OnNavigationItemSelectedListener true
             }
-            R.id.bottom_nav_messages -> {
-
-                return@OnNavigationItemSelectedListener true
-            }
+//            R.id.bottom_nav_messages -> {
+//
+//                return@OnNavigationItemSelectedListener true
+//            }
         }
         false
     }

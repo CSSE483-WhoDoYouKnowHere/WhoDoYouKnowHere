@@ -1,5 +1,6 @@
 package edu.rosehulman.whodoyouknowhere.whodoyouknowhere
 
+import android.graphics.Picture
 import android.os.Parcel
 import android.os.Parcelable
 import com.google.firebase.firestore.DocumentSnapshot

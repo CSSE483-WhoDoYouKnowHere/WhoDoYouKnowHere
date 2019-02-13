@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.google.firebase.firestore.*
 import com.mindorks.placeholderview.SwipeDecor
+import kotlinx.android.synthetic.main.card_user_view.view.*
 import kotlinx.android.synthetic.main.fragment_attendee_list.view.*
 
 
