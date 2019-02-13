@@ -15,7 +15,9 @@ import android.util.Log
 import android.view.*
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.QuerySnapshot
 import com.mindorks.placeholderview.SwipeDecor
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.add_user_dialog.view.*
@@ -26,7 +28,6 @@ import kotlinx.android.synthetic.main.nav_header_main.view.*
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener,
     BottomNavigationView.OnNavigationItemSelectedListener, EventOrgFragment.OnEventOrgFragmentSelectedListener {
-
 
 
     private var isNewUser = false
@@ -42,21 +43,64 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private var uid: String? = null
     private var backButtonCount = 0
     private val ageMinimum = 18
+
+    private var eventList: ArrayList<Event> = ArrayList()
     private val userRef = FirebaseFirestore
         .getInstance()
         .collection(Constants.USERS_COLLECTION)
+    private val eventsRef = FirebaseFirestore
+        .getInstance()
+        .collection(Constants.EVENTS_COLLECTION)
+
 
     init {
 
         val currentUser = user!!.metadata
         isNewUser = currentUser!!.creationTimestamp == currentUser.lastSignInTimestamp
 
-
         if (isNewUser) {
             Log.d(Constants.TAG, "New User $currentUser detected. Launching User Profile Dialog")
         }
+
+        this.addEventSnapshotListener()
+        Log.d(Constants.TAG, "UID is: ${auth.currentUser?.uid}")
     }
 
+    fun addEventSnapshotListener() {
+        eventsRef
+            .addSnapshotListener { snapshot, fireStoreException ->
+                if (fireStoreException != null) {
+                    Log.d(Constants.TAG, "Firebase error: $fireStoreException")
+                    return@addSnapshotListener
+                }
+                processEventSnapshotDiffs(snapshot!!)
+
+            }
+    }
+
+    fun processEventSnapshotDiffs(snapshot: QuerySnapshot) {
+
+        for (documentChange in snapshot.documentChanges) {
+            val event = Event.fromSnapshot(documentChange.document)
+            when (documentChange.type) {
+                DocumentChange.Type.ADDED -> {
+                    Log.d(Constants.TAG, "Adding $event")
+                    eventList.add(0, event)
+                }
+                DocumentChange.Type.REMOVED -> {
+                    Log.d(Constants.TAG, "Removing $event")
+                    val index = eventList.indexOfFirst { it.id == event.id }
+                    eventList.removeAt(index)
+                }
+                DocumentChange.Type.MODIFIED -> {
+                    Log.d(Constants.TAG, "Modifying $event")
+                    val index = eventList.indexOfFirst { it.id == event.id }
+                    eventList[index] = event
+                }
+            }
+        }
+
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -97,7 +141,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         val cardViewHolderSize = Point(windowSize.x, windowSize.y - bottomMargin)
 
-        for (event in Utils.getSampleEvents()) {
+        for (event in eventList) {
             swipeView!!.addView(EventCard(this, event, cardViewHolderSize))
         }
 
@@ -149,6 +193,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         nav_view.setNavigationItemSelectedListener(this)
     }
 
+    fun onSwipeLeft(event: Event) {
+        Log.d(Constants.TAG, "Current User: ${user?.uid}")
+        userRef.document(user!!.uid)
+    }
+
+    fun onSwipeRight(event: Event) {
+
+
+    }
+
     fun launchUserProfileDialog() {
         val builder = AlertDialog.Builder(this)
         builder.setTitle(getString(R.string.user_profile_dialog_title))
@@ -174,8 +228,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             userRef.add(user)
         }
         builder.setNegativeButton(android.R.string.cancel, null) // :)
-
-
         builder.create().show()
     }
 

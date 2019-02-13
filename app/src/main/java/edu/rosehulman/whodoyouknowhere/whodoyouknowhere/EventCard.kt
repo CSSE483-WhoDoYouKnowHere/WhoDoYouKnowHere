@@ -12,10 +12,11 @@ import kotlin.math.sqrt
 
 
 @Layout(R.layout.card_event_swipe_view)
-class EventCard(private val context: Context,
-                 private val event: Event,
-                 private val cardViewHolderSize: Point
-                ) {
+class EventCard(
+    private val context: Context,
+    private val event: Event,
+    private val cardViewHolderSize: Point
+) {
 
     @View(R.id.cardSwipeView_Image)
     lateinit var profileImageView: ImageView
@@ -44,9 +45,9 @@ class EventCard(private val context: Context,
 //            .centerInside()
 //            .into(profileImageView)
 //        eventNameText.text = "${profile.name},  ${profile.age}"
-        eventNameText.text=event.title
+        eventNameText.text = event.title
         eventLocationText.text = event.location
-        eventDateText.text= System.currentTimeMillis().toString()
+        eventDateText.text = System.currentTimeMillis().toString()
         swipeView.alpha = 1f
     }
 
@@ -55,11 +56,6 @@ class EventCard(private val context: Context,
         Log.d("EVENT", "profileImageView click")
     }
 
-    @SwipeOutDirectional
-    fun onSwipeOutDirectional(direction: SwipeDirection) {
-        Log.d("DEBUG", "SwipeOutDirectional " + direction.name)
-
-    }
 
     @SwipeCancelState
     fun onSwipeCancelState() {
@@ -67,9 +63,20 @@ class EventCard(private val context: Context,
         swipeView.alpha = 1f
     }
 
+
+    @SwipeOutDirectional
+    fun onSwipeOutDirectional(direction: SwipeDirection) {
+        // Log.d("DEBUG", "SwipeOutDirectional " + direction.name)
+        Log.d(Constants.TAG, "Swiped Left on Event ${event.title}")
+        (context as MainActivity).onSwipeLeft(event)
+
+    }
+
     @SwipeInDirectional
     fun onSwipeInDirectional(direction: SwipeDirection) {
-        Log.d("DEBUG", "SwipeInDirectional " + direction.name)
+        //Log.d("DEBUG", "SwipeInDirectional " + direction.name)
+        Log.d(Constants.TAG, "Swiped Right on Event ${event.title}")
+        (context as MainActivity).onSwipeRight(event)
     }
 
     @SwipingDirection
@@ -81,21 +88,26 @@ class EventCard(private val context: Context,
     fun onSwipeTouch(xStart: Float, yStart: Float, xCurrent: Float, yCurrent: Float) {
 
         val cardHolderDiagonalLength =
-            sqrt(Math.pow(cardViewHolderSize.x.toDouble(), 2.0)
-                    + (Math.pow(cardViewHolderSize.y.toDouble(), 2.0)))
-        val distance = sqrt(Math.pow(xCurrent.toDouble() - xStart.toDouble(), 2.0)
-                + (Math.pow(yCurrent.toDouble() - yStart, 2.0)))
+            sqrt(
+                Math.pow(cardViewHolderSize.x.toDouble(), 2.0)
+                        + (Math.pow(cardViewHolderSize.y.toDouble(), 2.0))
+            )
+        val distance = sqrt(
+            Math.pow(xCurrent.toDouble() - xStart.toDouble(), 2.0)
+                    + (Math.pow(yCurrent.toDouble() - yStart, 2.0))
+        )
 
         val alpha = 1 - distance / cardHolderDiagonalLength
 
-        Log.d("DEBUG", "onSwipeTouch "
-                + " xStart : " + xStart
-                + " yStart : " + yStart
-                + " xCurrent : " + xCurrent
-                + " yCurrent : " + yCurrent
-                + " distance : " + distance
-                + " TotalLength : " + cardHolderDiagonalLength
-                + " alpha : " + alpha
+        Log.d(
+            "DEBUG", "onSwipeTouch "
+                    + " xStart : " + xStart
+                    + " yStart : " + yStart
+                    + " xCurrent : " + xCurrent
+                    + " yCurrent : " + yCurrent
+                    + " distance : " + distance
+                    + " TotalLength : " + cardHolderDiagonalLength
+                    + " alpha : " + alpha
         )
 
         swipeView.alpha = alpha.toFloat();

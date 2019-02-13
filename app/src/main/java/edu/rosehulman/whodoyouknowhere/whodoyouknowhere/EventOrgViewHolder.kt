@@ -1,12 +1,9 @@
 package edu.rosehulman.whodoyouknowhere.whodoyouknowhere
 
 import android.content.Context
-import android.graphics.Color
-import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.widget.TextView
-import kotlinx.android.synthetic.main.card_event_view.view.*
 
 class EventOrgViewHolder(itemView: View, val adapter: EventOrgAdapter, val context: Context) : RecyclerView.ViewHolder(itemView) {
     private val titleTextView = itemView.findViewById<TextView>(R.id.event_name_text_view)
