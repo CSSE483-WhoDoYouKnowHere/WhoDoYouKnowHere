@@ -4,7 +4,9 @@ import android.app.DatePickerDialog
 import android.content.Intent
 import android.graphics.Point
 import android.os.Bundle
+import android.support.annotation.NonNull
 import android.support.design.widget.BottomNavigationView
+import android.support.design.widget.FloatingActionButton
 import android.support.design.widget.NavigationView
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
@@ -17,8 +19,12 @@ import android.support.v7.widget.helper.ItemTouchHelper
 import android.util.Log
 import android.view.*
 import android.widget.Toast
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.android.gms.tasks.Task
+import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.QuerySnapshot
 import com.mindorks.placeholderview.SwipeDecor
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.add_user_dialog.view.*
@@ -30,7 +36,8 @@ import kotlin.collections.ArrayList
 
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener,
-    BottomNavigationView.OnNavigationItemSelectedListener {
+    BottomNavigationView.OnNavigationItemSelectedListener, EventOrgFragment.OnEventOrgFragmentSelectedListener {
+
 
     private lateinit var mItemTouchHelper: ItemTouchHelper
     private lateinit var recyclerView: RecyclerView
@@ -53,7 +60,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         .getInstance()
         .collection(Constants.USERS_COLLECTION)
 
-
     init {
 
         val currentUser = user!!.metadata
@@ -62,10 +68,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if (isNewUser) {
             Log.d(Constants.TAG, "New User $currentUser detected. Launching User Profile Dialog")
             launchUserProfileDialog()
-        } else {
-            Log.d(Constants.TAG, "Existing User $currentUser detected.")
-        }
 
+        }
     }
 
 
@@ -75,7 +79,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         setSupportActionBar(toolbar)
 
         bottom_nav_view.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
-
         initializeListeners()
 
         val extras = intent.extras
@@ -123,28 +126,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 swipeView!!.undoLastSwipe()
             }
         }
-//        viewManager = LinearLayoutManager(this)
-//        eventAdapter = EventAdapter(this, viewManager)
-//
-//        recyclerView = findViewById<RecyclerView>(R.id.event_recycler_view).apply {
-//
-//            setHasFixedSize(true)
-//
-//            layoutManager = viewManager
-//
-//            adapter = eventAdapter
-//
-//        }
-//
-//        val callback = SimpleItemTouchHelperCallback(eventAdapter)
-//        mItemTouchHelper = ItemTouchHelper(callback)
-//        mItemTouchHelper.attachToRecyclerView(recyclerView)
 
         fab.hide()
-//        fab.setOnClickListener { view ->
-//            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                .setAction("Action", null).show()
-//        }
 
         val toggle = ActionBarDrawerToggle(
             this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
@@ -235,12 +218,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onBackPressed() {
         if (backButtonCount >= 1) {
             finish()
-        } else {
+        } else if (backButtonCount < 1) {
             Toast.makeText(this, getString(R.string.back_button_exit_toast), Toast.LENGTH_SHORT)
                 .show()
             backButtonCount++
-        }
-        if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
+        } else if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
             drawer_layout.closeDrawer(GravityCompat.START)
 
         } else {
@@ -267,8 +249,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
         when (item.itemId) {
             R.id.bottom_nav_event_org -> {
-                startEventOrgActivity(uid!!)
-
+                // startEventOrgActivity(uid!!)
+                val ft = supportFragmentManager.beginTransaction()
+                ft.replace(R.id.main_fragment_layout, EventOrgFragment(), Constants.EVENT_ORG_FRAGMENT)
+                ft.commit()
                 return@OnNavigationItemSelectedListener true
             }
             R.id.bottom_nav_home -> {
@@ -287,7 +271,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         // Handle navigation view item clicks here.
         when (item.itemId) {
             R.id.nav_hosted_events -> {
-                startEventOrgActivity(uid!!)
             }
             R.id.nav_gallery -> {
 
@@ -310,14 +293,25 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         return true
     }
 
-    private fun startEventOrgActivity(uid: String) {
-        val intent = Intent(this, EventOrgActivity(uid)::class.java)
-        startActivity(intent)
-        finish()
-    }
-
     private fun editProfileDialog() {
 
+    }
+
+    override fun onEventOrgFragmentSelected(event: Event) {
+        val eventId = event.id
+        val ft = supportFragmentManager.beginTransaction()
+        ft.replace(
+            R.id.main_fragment_layout,
+            AttendeeListFragment.newInstance(eventId),
+            Constants.ATTENDEE_LIST_FRAGMENT
+        )
+        ft.addToBackStack(Constants.ATTENDEE_LIST_FRAGMENT)
+        ft.commit()
+
+    }
+
+    fun getFab(): FloatingActionButton {
+        return fab
     }
 
     private fun setupSwipeView() {
