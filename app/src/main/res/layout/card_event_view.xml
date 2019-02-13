@@ -4,7 +4,11 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/card_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="6dp"
+        android:layout_margin="5dp"
+        app:cardElevation="5dp"
+>
 
     <RelativeLayout
             android:layout_width="match_parent"
