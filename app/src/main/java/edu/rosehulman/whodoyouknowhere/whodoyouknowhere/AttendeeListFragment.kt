@@ -65,6 +65,10 @@ class AttendeeListFragment : Fragment() {
 
 //    fun addUserSnapshotListener()
 
+    init {
+        this.addEventSnapshotListener()
+    }
+
 
     private fun processEventSnapshotDiffs(snapshot: QuerySnapshot) {
         for (docChange in snapshot.documentChanges) {
@@ -77,12 +81,12 @@ class AttendeeListFragment : Fragment() {
                     //don't care
                 }
                 DocumentChange.Type.MODIFIED -> {
-                    if(addingUser){
+                    if (addingUser && swipedUser != null) {
                         event.acceptedList.add(swipedUser!!)
-                        event.attendeeList.remove(swipedUser!!)
-                    } else {
+                        event.applicantList.remove(swipedUser!!)
+                    } else if (!addingUser && swipedUser != null) {
                         event.deniedList.add(swipedUser!!)
-                        event.attendeeList.remove(swipedUser!!)
+                        event.applicantList.remove(swipedUser!!)
                     }
                 }
             }
@@ -98,6 +102,9 @@ class AttendeeListFragment : Fragment() {
 
         val bottomMargin = Utils.dpToPx(margin)
         val windowSize = Utils.getDisplaySize(activity!!.windowManager)
+
+        val fab = (context as MainActivity).getFab()
+        fab.hide()
 
         view.swipe_on_user!!.builder
             .setDisplayViewCount(3)

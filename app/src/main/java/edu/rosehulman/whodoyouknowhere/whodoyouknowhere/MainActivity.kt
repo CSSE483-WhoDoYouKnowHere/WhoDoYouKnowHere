@@ -333,13 +333,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         return true
     }
 
-    private fun startEventOrgActivity(uid: String) {
-        val intent = Intent(this, EventOrgActivity(uid)::class.java)
-        //intent.putExtra("something", true)
-        startActivity(intent)
-        finish()
-    }
-
     private fun editProfileDialog() {
 
     }

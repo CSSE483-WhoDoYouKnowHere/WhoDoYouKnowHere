@@ -14,7 +14,10 @@ data class User(
     var sex: String = "",
     var locationID: Int = 0,
     var description: String = "",
-    var eventsHosting: ArrayList<Event> = arrayListOf(Event())
+    var eventsHosting: ArrayList<Event> = arrayListOf(Event()),
+    var eventsAppliedTo: ArrayList<Event> = arrayListOf(Event()),
+    var eventsAcceptedTo: ArrayList<Event> = arrayListOf(Event()),
+    var eventsDeniedFrom: ArrayList<Event> = arrayListOf(Event())
 ) : Parcelable {
 
     @ServerTimestamp
@@ -30,6 +33,9 @@ data class User(
         parcel.readString(),
         parcel.readInt(),
         parcel.readString(),
+        parcel.createTypedArrayList(Event.CREATOR),
+        parcel.createTypedArrayList(Event.CREATOR),
+        parcel.createTypedArrayList(Event.CREATOR),
         parcel.createTypedArrayList(Event.CREATOR)
     ) {
     }
@@ -42,6 +48,10 @@ data class User(
         parcel.writeInt(locationID)
         parcel.writeString(description)
         parcel.writeTypedList(eventsHosting)
+        parcel.writeTypedList(eventsAppliedTo)
+        parcel.writeTypedList(eventsAcceptedTo)
+        parcel.writeTypedList(eventsDeniedFrom)
+
     }
 
     override fun describeContents(): Int {
