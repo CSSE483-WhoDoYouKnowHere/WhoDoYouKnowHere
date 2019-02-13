@@ -1,5 +1,6 @@
 package edu.rosehulman.whodoyouknowhere.whodoyouknowhere
 
+import android.os.Bundle
 import android.os.Parcel
 import android.os.Parcelable
 import com.google.firebase.firestore.DocumentSnapshot
@@ -11,6 +12,7 @@ data class Event(
     var title: String = "Title",
     var date: String = "1/12/19",
     var location: String = "Olympus Mons,Mars",
+    var picUrl : String = "",
     var description: String = "A fun get-together!",
     var ageRestriction: Boolean = false,
     var eventType: String = "Party",
@@ -20,6 +22,8 @@ data class Event(
     var applicantList: ArrayList<User> = ArrayList(0),
     var acceptedList: ArrayList<User> = ArrayList(0),
     var deniedList: ArrayList<User> = ArrayList(0)
+   // var hashMap: Bundle = Bundle()
+
 ) : Parcelable {
 
 
@@ -34,6 +38,7 @@ data class Event(
         parcel.readString(),
         parcel.readString(),
         parcel.readString(),
+        parcel.readString(),
         parcel.readByte() != 0.toByte(),
         parcel.readString(),
         parcel.readDouble(),
@@ -42,6 +47,7 @@ data class Event(
         parcel.createTypedArrayList(User.CREATOR),
         parcel.createTypedArrayList(User.CREATOR),
         parcel.createTypedArrayList(User.CREATOR)
+       // parcel.readBundle(ClassLoader.getSystemClassLoader())
     )
 
     companion object CREATOR : Parcelable.Creator<Event> {
@@ -72,6 +78,7 @@ data class Event(
         parcel.writeString(title)
         parcel.writeString(date)
         parcel.writeString(location)
+        parcel.writeString(picUrl)
         parcel.writeString(description)
         parcel.writeByte(if (ageRestriction) 1 else 0)
         parcel.writeString(eventType)
@@ -81,6 +88,7 @@ data class Event(
         parcel.writeTypedList(applicantList)
         parcel.writeTypedList(acceptedList)
         parcel.writeTypedList(deniedList)
+       // parcel.writeBundle(hashMap)
     }
 
 }

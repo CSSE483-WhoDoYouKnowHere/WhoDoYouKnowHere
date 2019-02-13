@@ -4,9 +4,12 @@ import android.graphics.Point
 import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
+import com.bumptech.glide.Glide
 import com.mindorks.placeholderview.SwipeDirection
 import com.mindorks.placeholderview.annotations.*
 import com.mindorks.placeholderview.annotations.swipe.*
+import com.squareup.picasso.Picasso
+import jp.wasabeef.glide.transformations.RoundedCornersTransformation
 import kotlin.math.sqrt
 
 @Layout(R.layout.card_user_view)
@@ -35,19 +38,22 @@ class UserCard(
     @Resolve
     fun onResolved() {
 
-//        TODO: Give Users pictures :-)
-//
-//        Glide.with(context).load(user.picture).bitmapTransform(
+        Picasso.get()
+            .load(user.photoUrl)
+            .resize(800, 800)
+            .centerInside()
+            .into(profileImageView)
+
+//        Glide.with(context).load(user.photoUrl).bitmapTransform(
 //            RoundedCornersTransformation(
 //                context,
 //                Utils.dpToPx(7), //7
 //                0,
 //                RoundedCornersTransformation.CornerType.TOP)
-//        )
-//            .into(profileImageView)
+//        ).into(profileImageView)
+
         name.text = user.fullName
         age.text = user.age.toString()
-
         swipeView.alpha = 1f
     }
 
