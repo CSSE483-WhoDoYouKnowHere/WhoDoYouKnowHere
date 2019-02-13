@@ -10,7 +10,9 @@ import android.view.View
 import android.view.ViewGroup
 import com.google.firebase.firestore.*
 import com.mindorks.placeholderview.SwipeDecor
+import kotlinx.android.synthetic.main.card_event_view.*
 import kotlinx.android.synthetic.main.fragment_attendee_list.view.*
+import kotlin.math.E
 
 
 // TODO: Rename parameter arguments, choose names that match
@@ -45,8 +47,6 @@ class AttendeeListFragment : Fragment() {
         arguments?.let {
             eventId = it.getString(Constants.ARG_EVENT_ID)
             Log.d(Constants.TAG, "event ID : $eventId")
-            Log.d(Constants.TAG, "events ref doc: ${eventsRef.document(eventId).get()}")
-
         }
 
     }
@@ -59,16 +59,28 @@ class AttendeeListFragment : Fragment() {
                     return@addSnapshotListener
                 }
 
-//            populateLocalQuotes(snapshot!!)
                 processEventSnapshotDiffs(snapshot!!)
 
             }
     }
 
-//    fun addUserSnapshotListener()
+//    fun addUserSnapshotListener() {
+//        userRef.orderBy("timeStamp", Query.Direction.ASCENDING)
+//            .addSnapshotListener { snapshot, fireStoreException ->
+//                if (fireStoreException != null) {
+//                    Log.d(Constants.TAG, "Firebase error: $fireStoreException")
+//                    return@addSnapshotListener
+//                }
+//
+//                processUserSnapshotDiffs(snapshot!!)
+//
+//            }
+//    }
+
 
     init {
         this.addEventSnapshotListener()
+//        this.addUserSnapshotListener()
     }
 
 
@@ -85,9 +97,12 @@ class AttendeeListFragment : Fragment() {
                 DocumentChange.Type.MODIFIED -> {
                     if (addingUser) {
                         Log.d(Constants.TAG, "$swipedUser added to the accepted list")
-                        val acceptedPosition = acceptedList.indexOfFirst { event.id == it.id }
-                        event.acceptedList[acceptedPosition] = swipedUser!!
-                        event.applicantList.remove(swipedUser!!)
+                        // val acceptedPosition = acceptedList.indexOfFirst { event.id == it.id }
+                        // event.acceptedList[acceptedPosition] = swipedUser!!
+                        if (eventId == event.id) {
+                            event.acceptedList.add(swipedUser!!)
+                            event.applicantList.remove(swipedUser!!)
+                        }
                     } else if (!addingUser) {
                         val deniedPosition = deniedList.indexOfFirst { event.id == it.id }
                         event.deniedList[deniedPosition] = swipedUser!!
@@ -99,6 +114,35 @@ class AttendeeListFragment : Fragment() {
             }
         }
     }
+
+//    private fun processUserSnapshotDiffs(snapshot: QuerySnapshot) {
+//        for (docChange in snapshot.documentChanges) {
+//            val user = User.fromSnapshot(docChange.document)
+//            when (docChange.type) {
+//                DocumentChange.Type.ADDED -> {
+//                    //don't care
+//                }
+//                DocumentChange.Type.REMOVED -> {
+//                    //don't care
+//                }
+//                DocumentChange.Type.MODIFIED -> {
+//                    var event = Event()
+//                    eventsRef.document(eventId).get().addOnSuccessListener { snapshot: DocumentSnapshot ->
+//                        event = snapshot.toObject(Event::class.java) ?: Event()
+//                    }
+//                    if (addingUser) {
+//                        Log.d(Constants.TAG, "$swipedUser added to the accepted list")
+//                        user.eventsAcceptedTo.add(event)
+//                        user.eventsAppliedTo.remove(event)
+//                    } else if (!addingUser) {
+//                        user.eventsDeniedFrom.add(event)
+//                        user.eventsAppliedTo.remove(event)
+//
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -164,45 +208,36 @@ class AttendeeListFragment : Fragment() {
         addingUser = true
         var event = Event()
         eventsRef.document(eventId).get().addOnSuccessListener { snapshot: DocumentSnapshot ->
-            //            acceptedList = snapshot.toObject(Event::class.java)?.acceptedList ?: ArrayList<User>(0)
-//            acceptedList.add(user)
-//
-//            applicantList = snapshot.toObject(Event::class.java)?.applicantList ?: ArrayList<User>(0)
-//            applicantList.remove(user)
             event = snapshot.toObject(Event::class.java) ?: Event()
 
         }
         event.acceptedList.add(user)
         event.applicantList.remove(user)
         eventsRef.document(eventId).set(event)
-//        eventsRef.document(eventId).set(applicantList)
-//        eventsRef.document(eventId).set(deniedList)
+
+//        swipedUser!!.eventsAcceptedTo.add(event)
+//        swipedUser!!.eventsAppliedTo.remove(event)
+//        userRef.document(swipedUser!!.id).set(swipedUser!!)
+
     }
 
     fun onSwipeLeft(user: User) {
         swipedUser = user
         addingUser = false
-        var event: Event?
-//        Log.d(Constants.TAG, "Event ID passed in : $eventId")
-//        Log.d(Constants.TAG, "events ref doc: $eventsRef.document(eventId).get()")
+        var event: Event? = null
         eventsRef.document(eventId).get().addOnSuccessListener { snapshot: DocumentSnapshot ->
             event = snapshot.toObject(Event::class.java)
-            Log.d(Constants.TAG, "event from snapshot: $event")
+        }
+        Log.d(Constants.TAG, "Event is $event")
+        if (event != null) {
             event?.deniedList?.add(user)
-            Log.d(Constants.TAG, "Event Denied List: ${event?.deniedList}")
-
-            Log.d(Constants.TAG, "Event Applicant List (before Remove) : ${event?.applicantList}")
             event?.applicantList?.remove(user)
-            Log.d(Constants.TAG, "Event Applicant List (after Remove) : ${event?.applicantList}")
             eventsRef.document(eventId).set(event!!)
         }
-//
-//        eventsRef.whereEqualTo("eventID", eventId)
-//
-//        event?.deniedList?.add(user)
-//        event?.applicantList?.remove(user)
-//        eventsRef.document(eventId).set(event)
 
+//        swipedUser!!.eventsDeniedFrom.add(event)
+//        swipedUser!!.eventsAppliedTo.remove(event)
+//        userRef.document(swipedUser!!.id).set(swipedUser!!)
 
     }
 
