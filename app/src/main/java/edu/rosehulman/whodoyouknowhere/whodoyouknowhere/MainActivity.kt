@@ -43,8 +43,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private lateinit var recyclerView: RecyclerView
     private lateinit var eventAdapter: EventAdapter
     private lateinit var viewManager: LinearLayoutManager
+    private var isNewUser = false
+
+    private val margin = 160 //160
+    private val animationDuration = 300
+    private var isToUndo = false
+
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val user = auth.currentUser
+
     lateinit var authListener: FirebaseAuth.AuthStateListener
     private var uid: String? = null
     private var backButtonCount = 0
@@ -53,24 +60,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         .getInstance()
         .collection(Constants.USERS_COLLECTION)
 
-    private val margin = 160 //160
-    private val animationDuration = 300
-    private var isToUndo = false
-
     init {
 
-        uid = user!!.uid
-        userRef.whereEqualTo("id", uid)
-            .limit(1).get()
-            .addOnCompleteListener(OnCompleteListener<QuerySnapshot> { task ->
-                if (task.isSuccessful) {
-                    Log.d(Constants.TAG, "User exists with UID: $uid")
-                    val isEmpty = task.result!!.isEmpty
-                } else {
-                    Log.d(Constants.TAG, "User does not exist. UID: $uid \nProceeding to add User object to Firebase")
-                    addUser()
-                }
-            })
+        val currentUser = user!!.metadata
+        isNewUser = currentUser!!.creationTimestamp == currentUser.lastSignInTimestamp
+
+        if (isNewUser) {
+            Log.d(Constants.TAG, "New User $currentUser detected. Launching User Profile Dialog")
+            launchUserProfileDialog()
+
+        }
     }
 
 
@@ -80,25 +79,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         setSupportActionBar(toolbar)
 
         bottom_nav_view.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
-
-
-        val completeListener = OnCompleteListener<AuthResult> {
-
-            @NonNull
-            fun onComplete(task: Task<AuthResult>) {
-                if (task.isSuccessful()) {
-                    var isNew = task.result?.additionalUserInfo?.isNewUser
-                    Log.d("MyTAG", "onComplete: $isNew")
-                }
-            }
-        }
-
-        val s = FirebaseAuth.getInstance().getAccessToken(true)
-
-
-
-
-        setupSwipeView()
         initializeListeners()
 
         val extras = intent.extras
@@ -146,28 +126,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 swipeView!!.undoLastSwipe()
             }
         }
-//        viewManager = LinearLayoutManager(this)
-//        eventAdapter = EventAdapter(this, viewManager)
-//
-//        recyclerView = findViewById<RecyclerView>(R.id.event_recycler_view).apply {
-//
-//            setHasFixedSize(true)
-//
-//            layoutManager = viewManager
-//
-//            adapter = eventAdapter
-//
-//        }
-//
-//        val callback = SimpleItemTouchHelperCallback(eventAdapter)
-//        mItemTouchHelper = ItemTouchHelper(callback)
-//        mItemTouchHelper.attachToRecyclerView(recyclerView)
 
         fab.hide()
-//        fab.setOnClickListener { view ->
-//            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                .setAction("Action", null).show()
-//        }
 
         val toggle = ActionBarDrawerToggle(
             this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
@@ -202,7 +162,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         nav_view.setNavigationItemSelectedListener(this)
     }
 
-    fun addUser() {
+    fun launchUserProfileDialog() {
         var builder = AlertDialog.Builder(this)
         builder.setTitle(getString(R.string.user_profile_dialog_title))
         val view = LayoutInflater.from(this).inflate(R.layout.add_user_dialog, null, false)

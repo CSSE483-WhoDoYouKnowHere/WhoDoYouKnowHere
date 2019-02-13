@@ -84,7 +84,6 @@ class LoginActivity : AppCompatActivity() {
             .setTheme(R.style.LoginTheme)
             .setLogo(R.mipmap.ic_launcher)
             .build()
-
         startActivityForResult(
             loginIntent,
             RC_SIGN_IN
