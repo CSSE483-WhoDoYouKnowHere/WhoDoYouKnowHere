@@ -11,7 +11,6 @@ import android.view.ViewGroup
 import com.google.firebase.firestore.*
 import com.mindorks.placeholderview.SwipeDecor
 import kotlinx.android.synthetic.main.fragment_attendee_list.view.*
-import kotlin.math.E
 
 
 // TODO: Rename parameter arguments, choose names that match
@@ -46,6 +45,8 @@ class AttendeeListFragment : Fragment() {
         arguments?.let {
             eventId = it.getString(Constants.ARG_EVENT_ID)
             Log.d(Constants.TAG, "event ID : $eventId")
+            Log.d(Constants.TAG, "events ref doc: ${eventsRef.document(eventId).get()}")
+
         }
 
     }
@@ -181,13 +182,26 @@ class AttendeeListFragment : Fragment() {
     fun onSwipeLeft(user: User) {
         swipedUser = user
         addingUser = false
-        var event = Event()
+        var event: Event?
+//        Log.d(Constants.TAG, "Event ID passed in : $eventId")
+//        Log.d(Constants.TAG, "events ref doc: $eventsRef.document(eventId).get()")
         eventsRef.document(eventId).get().addOnSuccessListener { snapshot: DocumentSnapshot ->
-            event = snapshot.toObject(Event::class.java) ?: Event()
+            event = snapshot.toObject(Event::class.java)
+            Log.d(Constants.TAG, "event from snapshot: $event")
+            event?.deniedList?.add(user)
+            Log.d(Constants.TAG, "Event Denied List: ${event?.deniedList}")
+
+            Log.d(Constants.TAG, "Event Applicant List (before Remove) : ${event?.applicantList}")
+            event?.applicantList?.remove(user)
+            Log.d(Constants.TAG, "Event Applicant List (after Remove) : ${event?.applicantList}")
+            eventsRef.document(eventId).set(event!!)
         }
-        event.deniedList.add(user)
-        event.applicantList.remove(user)
-        eventsRef.document(eventId).set(event)
+//
+//        eventsRef.whereEqualTo("eventID", eventId)
+//
+//        event?.deniedList?.add(user)
+//        event?.applicantList?.remove(user)
+//        eventsRef.document(eventId).set(event)
 
 
     }

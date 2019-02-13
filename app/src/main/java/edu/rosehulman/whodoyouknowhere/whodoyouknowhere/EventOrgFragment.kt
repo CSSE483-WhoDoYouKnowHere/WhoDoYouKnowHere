@@ -5,12 +5,13 @@ import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.support.v7.widget.helper.ItemTouchHelper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.google.firebase.auth.FirebaseAuth
 
-
+private lateinit var mItemTouchHelper: ItemTouchHelper
 private lateinit var eventOrgAdapter: EventOrgAdapter
 private lateinit var recyclerView: RecyclerView
 private lateinit var viewManager: LinearLayoutManager
@@ -62,6 +63,10 @@ class EventOrgFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(activity)
         recyclerView.setHasFixedSize(true)
         recyclerView.adapter = eventOrgAdapter
+
+        val callback = SimpleItemTouchHelperCallback(eventOrgAdapter)
+        mItemTouchHelper = ItemTouchHelper(callback)
+        mItemTouchHelper.attachToRecyclerView(recyclerView)
         val fab = (context as MainActivity).getFab()
         fab.show()
 

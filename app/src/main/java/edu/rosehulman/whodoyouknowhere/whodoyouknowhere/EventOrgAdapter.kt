@@ -9,12 +9,16 @@ import android.view.ViewGroup
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import kotlinx.android.synthetic.main.add_event_dialog.view.*
 
 
-class EventOrgAdapter(val context: Context?, var uid: String, val listener: EventOrgFragment.OnEventOrgFragmentSelectedListener?) : RecyclerView.Adapter<EventOrgViewHolder>() {
+class EventOrgAdapter(
+    val context: Context?,
+    var uid: String,
+    val listener: EventOrgFragment.OnEventOrgFragmentSelectedListener?
+) : RecyclerView.Adapter<EventOrgViewHolder>(), ItemTouchHelperAdapter {
+
 
     private val user = FirebaseAuth.getInstance().currentUser
     private var eventsHosted = ArrayList<Event>()
@@ -47,14 +51,10 @@ class EventOrgAdapter(val context: Context?, var uid: String, val listener: Even
                     Log.d(Constants.TAG, "Firebase error: $fireStoreException")
                     return@addSnapshotListener
                 }
-
-//            populateLocalQuotes(snapshot!!)
                 processEventSnapshotDiffs(snapshot!!)
 
             }
     }
-
-//    fun addUserSnapshotListener()
 
 
     private fun processEventSnapshotDiffs(snapshot: QuerySnapshot) {
@@ -62,18 +62,18 @@ class EventOrgAdapter(val context: Context?, var uid: String, val listener: Even
             val event = Event.fromSnapshot(docChange.document)
             when (docChange.type) {
                 DocumentChange.Type.ADDED -> {
-                    Log.d(Constants.TAG,"Event: $event added")
+                    Log.d(Constants.TAG, "Event: $event added")
                     eventsHosted.add(0, event)
                     notifyItemInserted(0)
                 }
                 DocumentChange.Type.REMOVED -> {
-                    Log.d(Constants.TAG,"Event: $event removed")
+                    Log.d(Constants.TAG, "Event: $event removed")
                     val position = eventsHosted.indexOf(event)
                     eventsHosted.removeAt(position)
                     notifyItemRemoved(position)
                 }
                 DocumentChange.Type.MODIFIED -> {
-                    Log.d(Constants.TAG,"Event: $event modified")
+                    Log.d(Constants.TAG, "Event: $event modified")
                     val position = eventsHosted.indexOfFirst { event.id == it.id }
                     eventsHosted[position] = event
                     notifyItemChanged(position)
@@ -152,6 +152,17 @@ class EventOrgAdapter(val context: Context?, var uid: String, val listener: Even
         //TODO: Probably add another snapshot listener for the user's eventsHosted list :-(
     }
 
+    override fun onItemMove(fromPosition: Int, toPosition: Int) {
+        val prev = eventsHosted.removeAt(fromPosition)
+        eventsHosted.add(if (toPosition > fromPosition) toPosition - 1 else toPosition, prev)
+        notifyItemMoved(fromPosition, toPosition)
+    }
+
+    override fun onItemDismiss(position: Int) {
+
+        eventsRef.document(eventsHosted[position].id).delete()
+
+    }
 
     override fun getItemCount() = eventsHosted.size
 

@@ -11,9 +11,6 @@ import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.helper.ItemTouchHelper
 import android.util.Log
 import android.view.*
 import android.widget.Toast
@@ -31,10 +28,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     BottomNavigationView.OnNavigationItemSelectedListener, EventOrgFragment.OnEventOrgFragmentSelectedListener {
 
 
-    private lateinit var mItemTouchHelper: ItemTouchHelper
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var eventAdapter: EventAdapter
-    private lateinit var viewManager: LinearLayoutManager
+
     private var isNewUser = false
 
     private val margin = 160 //160
@@ -56,6 +50,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         val currentUser = user!!.metadata
         isNewUser = currentUser!!.creationTimestamp == currentUser.lastSignInTimestamp
+
 
         if (isNewUser) {
             Log.d(Constants.TAG, "New User $currentUser detected. Launching User Profile Dialog")
@@ -310,27 +305,4 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         return fab
     }
 
-    private fun setupSwipeView() {
-//        mSwipeView = findViewById(R.id.swipeView)
-//
-//        mSwipeView.getBuilder<SwipePlaceHolderView, SwipeViewBuilder<SwipePlaceHolderView>>()
-//            .setDisplayViewCount(3)
-//            .setSwipeDecor(
-//                SwipeDecor()
-//                    .setPaddingTop(20)
-//                    .setRelativeScale(0.01f)
-//                    .setSwipeInMsgLayoutId(R.layout.card_event_swipe_in)
-//                    .setSwipeOutMsgLayoutId(R.layout.card_event_swipe_out)
-//            )
-//
-//
-//        for (i in 1..5) {
-//            var event = Utils.getSampleEvents()
-//            mSwipeView.addView(EventCard(this, event, mSwipeView))
-//        }
-//
-//        findViewById<ImageButton>(R.id.rejectBtn).setOnClickListener { mSwipeView.doSwipe(false) }
-//
-//        findViewById<ImageButton>(R.id.acceptBtn).setOnClickListener { mSwipeView.doSwipe(true) }
-    }
 }
