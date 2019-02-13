@@ -30,23 +30,23 @@ class EventOrgActivity(val uid : String="") : AppCompatActivity(), NavigationVie
             this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
         )
 
-        eventOrgAdapter = EventOrgAdapter(this, uid)
-
-        viewManager = LinearLayoutManager(this)
-
-        recyclerView = findViewById<RecyclerView>(R.id.event_org_recycler_view).apply {
-
-            setHasFixedSize(true)
-
-            layoutManager = viewManager
-
-            adapter = eventOrgAdapter
-
-        }
-
-        fab.setOnClickListener {
-            eventOrgAdapter.showAddEditDialog()
-        }
+//        eventOrgAdapter = EventOrgAdapter(this, uid,)
+//
+//        viewManager = LinearLayoutManager(this)
+//
+//        recyclerView = findViewById<RecyclerView>(R.id.event_org_recycler_view).apply {
+//
+//            setHasFixedSize(true)
+//
+//            layoutManager = viewManager
+//
+//            adapter = eventOrgAdapter
+//
+//        }
+//
+//        fab.setOnClickListener {
+//            eventOrgAdapter.showAddEditDialog()
+//        }
 
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()

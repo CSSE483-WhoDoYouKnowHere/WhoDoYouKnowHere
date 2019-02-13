@@ -6,6 +6,7 @@ import android.graphics.Point
 import android.os.Bundle
 import android.support.annotation.NonNull
 import android.support.design.widget.BottomNavigationView
+import android.support.design.widget.FloatingActionButton
 import android.support.design.widget.NavigationView
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
@@ -21,7 +22,6 @@ import android.widget.Toast
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.AuthResult
-import com.google.firebase.auth.EmailAuthCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
@@ -36,7 +36,8 @@ import kotlin.collections.ArrayList
 
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener,
-    BottomNavigationView.OnNavigationItemSelectedListener {
+    BottomNavigationView.OnNavigationItemSelectedListener, EventOrgFragment.OnEventOrgFragmentSelectedListener {
+
 
     private lateinit var mItemTouchHelper: ItemTouchHelper
     private lateinit var recyclerView: RecyclerView
@@ -52,7 +53,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         .getInstance()
         .collection(Constants.USERS_COLLECTION)
 
-    private  val margin  = 160 //160
+    private val margin = 160 //160
     private val animationDuration = 300
     private var isToUndo = false
 
@@ -73,8 +74,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
 
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -86,18 +85,17 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val completeListener = OnCompleteListener<AuthResult> {
 
             @NonNull
-            fun onComplete(task:  Task<AuthResult> ) {
+            fun onComplete(task: Task<AuthResult>) {
                 if (task.isSuccessful()) {
-                    var  isNew = task.result?.additionalUserInfo?.isNewUser
+                    var isNew = task.result?.additionalUserInfo?.isNewUser
                     Log.d("MyTAG", "onComplete: $isNew")
                 }
             }
         }
 
-        val s=  FirebaseAuth.getInstance().getAccessToken(true)
+        val s = FirebaseAuth.getInstance().getAccessToken(true)
 
-        EmailAuthCredential.get()
-        auth.signInWithCredential()
+
 
 
         setupSwipeView()
@@ -126,13 +124,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     .setSwipeAnimTime(animationDuration)
                     .setRelativeScale(0.01f)
                     .setSwipeInMsgLayoutId(R.layout.card_event_swipe_in)
-                    .setSwipeOutMsgLayoutId(R.layout.card_event_swipe_out))
+                    .setSwipeOutMsgLayoutId(R.layout.card_event_swipe_out)
+            )
 
 
         val cardViewHolderSize = Point(windowSize.x, windowSize.y - bottomMargin)
 
         for (event in Utils.getSampleEvents()) {
-            swipeView!!.addView(EventCard(this,event,cardViewHolderSize))
+            swipeView!!.addView(EventCard(this, event, cardViewHolderSize))
         }
 
         rejectBtn.setOnClickListener({ swipeView!!.doSwipe(false) })
@@ -240,7 +239,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
 
-
     private fun initializeListeners() {
         authListener = FirebaseAuth.AuthStateListener { auth: FirebaseAuth ->
             val user = auth.currentUser
@@ -260,12 +258,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onBackPressed() {
         if (backButtonCount >= 1) {
             finish()
-        } else {
+        } else if (backButtonCount < 1) {
             Toast.makeText(this, getString(R.string.back_button_exit_toast), Toast.LENGTH_SHORT)
                 .show()
             backButtonCount++
-        }
-        if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
+        } else if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
             drawer_layout.closeDrawer(GravityCompat.START)
 
         } else {
@@ -292,8 +289,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
         when (item.itemId) {
             R.id.bottom_nav_event_org -> {
-                startEventOrgActivity(uid!!)
-
+                // startEventOrgActivity(uid!!)
+                val ft = supportFragmentManager.beginTransaction()
+                ft.replace(R.id.main_fragment_layout, EventOrgFragment(), Constants.EVENT_ORG_FRAGMENT)
+                ft.commit()
                 return@OnNavigationItemSelectedListener true
             }
             R.id.bottom_nav_home -> {
@@ -312,7 +311,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         // Handle navigation view item clicks here.
         when (item.itemId) {
             R.id.nav_hosted_events -> {
-                startEventOrgActivity(uid!!)
             }
             R.id.nav_gallery -> {
 
@@ -344,6 +342,23 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private fun editProfileDialog() {
 
+    }
+
+    override fun onEventOrgFragmentSelected(event: Event) {
+        val eventId = event.id
+        val ft = supportFragmentManager.beginTransaction()
+        ft.replace(
+            R.id.main_fragment_layout,
+            AttendeeListFragment.newInstance(eventId),
+            Constants.ATTENDEE_LIST_FRAGMENT
+        )
+        ft.addToBackStack(Constants.ATTENDEE_LIST_FRAGMENT)
+        ft.commit()
+
+    }
+
+    fun getFab(): FloatingActionButton {
+        return fab
     }
 
     private fun setupSwipeView() {
