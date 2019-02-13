@@ -55,13 +55,13 @@ object Utils {
 
     fun getSampleUsers() : ArrayList<User> {
         val sampleUsers: ArrayList<User> = arrayListOf(
-            User("d", "Anand Desai", 20, "Male",
+            User("d", "Anand Desai", "https://cdn.pixabay.com/photo/2018/03/31/16/23/african-american-3278519_1280.jpg",20, "Male",
                 0, "description is nothing", ArrayList()
             ),
-            User("fds", "Joshua Eckels", 20, "Male",
+            User("fds", "Joshua Eckels", "https://cdn.pixabay.com/photo/2015/01/08/18/29/entrepreneur-593358_1280.jpg",20, "Male",
                 0, "description is nothing", ArrayList()
             ),
-            User("ds", "Alex Dripchak", 20, "Male",
+            User("ds", "Alex Dripchak", "https://cdn.pixabay.com/photo/2017/08/30/17/27/business-woman-2697954_960_720.jpg",20, "Male",
                 0, "description is nothing", ArrayList()
             )
 

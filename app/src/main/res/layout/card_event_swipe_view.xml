@@ -15,7 +15,8 @@
         <ImageView
                 android:id="@+id/cardSwipeView_Image"
                 android:layout_width="match_parent"
-                android:layout_height="250dp"
+                android:layout_height="450dp"
+                android:layout_marginBottom="20dp"
                 android:scaleType="centerCrop"
                 android:src="@android:color/holo_orange_dark"
         />
@@ -25,6 +26,16 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/event_name_text_view"
                 android:layout_below="@+id/cardSwipeView_Image"
+                android:textSize="20sp"
+        />
+        <TextView
+                android:text="Type"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_toRightOf="@+id/event_name_text_view"
+                android:id="@+id/event_type_text_view"
+                android:layout_below="@id/cardSwipeView_Image"
                 android:textSize="20sp"
         />
 
@@ -42,6 +53,15 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/event_location_text_view"
                 android:layout_below="@id/event_date_text_view"
+                android:textSize="20sp"
+        />
+
+        <TextView
+                android:text="Description"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/event_desc_text_view"
+                android:layout_below="@id/event_location_text_view"
                 android:textSize="20sp"
         />
     </RelativeLayout>

@@ -3,14 +3,17 @@
 
     <item
             android:id="@+id/bottom_nav_event_org"
+            android:icon="@drawable/ic_event"
             android:title="Host Event"/>
 
     <item
             android:id="@+id/bottom_nav_home"
+            android:icon="@drawable/ic_home"
             android:title="Home"/>
 
     <item
             android:id="@+id/bottom_nav_messages"
+            android:icon="@drawable/ic_baseline_notifications_24px"
             android:title="Messages"/>
 
 </menu>

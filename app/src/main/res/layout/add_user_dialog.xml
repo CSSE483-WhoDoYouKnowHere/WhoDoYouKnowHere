@@ -4,40 +4,51 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_margin="20dp"
+
 >
 
     <TextView
             android:text="Full Name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
             android:id="@+id/user_name_text"/>
     <EditText
             android:id="@+id/user_name_edit_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+
     />
 
     <TextView
             android:text="Birthday"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/user_age_text"/>
+            android:layout_marginBottom="10dp"
+            android:id="@+id/user_bday_text"/>
 
     <Button android:id="@+id/select_date_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Select Date"
+            android:background="@android:color/holo_blue_light"
+            android:layout_marginBottom="10dp"
     />
 
     <TextView
             android:text="Sex"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
             android:id="@+id/user_sex"/>
     <android.support.v7.widget.AppCompatSpinner
             android:id="@+id/sex_drop_down"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+    >
 
     </android.support.v7.widget.AppCompatSpinner>
 
@@ -45,11 +56,13 @@
             android:text="Tell us something about you! (Description)"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
             android:id="@+id/user_description"/>
     <EditText
             android:id="@+id/user_description_edit_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
             android:inputType="textAutoCorrect"
     />
 </LinearLayout>
