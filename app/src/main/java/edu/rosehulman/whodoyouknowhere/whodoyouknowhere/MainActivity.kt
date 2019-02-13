@@ -1,8 +1,9 @@
 package edu.rosehulman.whodoyouknowhere.whodoyouknowhere
 
-import android.app.Fragment
+import android.app.DatePickerDialog
 import android.content.Intent
 import android.graphics.Point
+import android.net.Uri
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
 import android.support.design.widget.FloatingActionButton
@@ -14,17 +15,23 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.*
+import android.widget.ArrayAdapter
+import android.widget.Spinner
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentChange
+import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
+import com.google.type.Date
 import com.mindorks.placeholderview.SwipeDecor
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.add_user_dialog.view.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.android.synthetic.main.nav_header_main.view.*
+import java.net.URL
+import java.util.*
 
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener,
@@ -36,7 +43,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private val margin = 160 //160
     private val animationDuration = 300
     private var isToUndo = false
-
+    private lateinit var cardViewHolderSize: Point
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val user = auth.currentUser
 
@@ -59,12 +66,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val currentUser = user!!.metadata
         isNewUser = currentUser!!.creationTimestamp == currentUser.lastSignInTimestamp
 
-        if (isNewUser) {
-            Log.d(Constants.TAG, "New User $currentUser detected. Launching User Profile Dialog")
-        }
+        Log.d(Constants.DEBUG, "CreationDate: ${currentUser.creationTimestamp}")
+        Log.d(Constants.DEBUG, "LastSignIn: ${currentUser.lastSignInTimestamp}")
 
+        if (isNewUser) {
+            Log.d(Constants.TAG, "New User ${user.uid} detected. Launching User Profile Dialog")
+        }
+        Log.d(Constants.TAG, "UID is: ${auth.currentUser!!.uid}")
         this.addEventSnapshotListener()
-        Log.d(Constants.TAG, "UID is: ${auth.currentUser?.uid}")
     }
 
     fun addEventSnapshotListener() {
@@ -100,6 +109,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 }
             }
         }
+        Log.d(Constants.TAG, "EventList: ${eventList}")
+        for (event in eventList) {
+            swipeView!!.addView(EventCard(this, event, cardViewHolderSize))
+        }
+
 
     }
 
@@ -140,11 +154,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             )
 
 
-        val cardViewHolderSize = Point(windowSize.x, windowSize.y - bottomMargin)
+        cardViewHolderSize = Point(windowSize.x, windowSize.y - bottomMargin)
 
-        for (event in eventList) {
-            swipeView!!.addView(EventCard(this, event, cardViewHolderSize))
-        }
+        //TEST: Utils.getSampleEvents()
+//        for (event in eventList) {
+//            swipeView!!.addView(EventCard(this, event, cardViewHolderSize))
+//        }
 
         rejectBtn.setOnClickListener({ swipeView!!.doSwipe(false) })
 
@@ -195,13 +210,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     fun onSwipeLeft(event: Event) {
-        Log.d(Constants.TAG, "Current User: ${user?.uid}")
-        userRef.document(user!!.uid)
+        Log.d(Constants.TAG, "EventList: ${eventList}")
     }
 
     fun onSwipeRight(event: Event) {
-
-
+        Log.d(Constants.TAG, "EventList: ${eventList}")
     }
 
     fun launchUserProfileDialog() {
@@ -210,27 +223,54 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val view = LayoutInflater.from(this).inflate(R.layout.add_user_dialog, null, false)
         builder.setView(view)
 
-        val userId = uid.toString()
-        val name = view.user_name_edit_text.text.toString()
-//        val sexSpinner = view.sex_drop_down
-//
-//        val dateButton = view.select_date_button
-        val age: Int = 9
-//        dateButton.setOnClickListener {
-//            val now = Calendar.getInstance()
-//            val datePicker = DatePickerDialog(this, DatePickerDialog.OnDateSetListener { picker, year, month, day ->
-//                picker
-//            }, now[Calendar.YEAR - ageMinimum], now[Calendar.MONTH], now[Calendar.DATE])
-//            datePicker.show()
-//        }
+        val spinner: Spinner = view.sex_drop_down
+        ArrayAdapter.createFromResource(
+            this,
+            R.array.sex_array,
+            android.R.layout.simple_spinner_item
+        ).also { adapter ->
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            spinner.adapter = adapter
+        }
+        spinner.onItemSelectedListener
+
+        var sex = spinner.selectedItem.toString()
+        val userId = user!!.uid
+        var name: String
+        var photoUrl: Uri?
+        var provider: String
+
+        user.let {
+            name = user.displayName!!
+            photoUrl = user.photoUrl
+            provider = user.providerId
+        }
+        var description = view.user_description_edit_text.text.toString()
+
+        var age: Int = 0
+        val dateButton = view.select_date_button
+        dateButton.setOnClickListener {
+            val now = Calendar.getInstance()
+            val datePicker = DatePickerDialog(this, DatePickerDialog.OnDateSetListener { picker, mYear, mMonth, mDay ->
+                age =  mYear
+                view.select_date_button.text = "Age: ${age.toString()}"
+            }, now[Calendar.YEAR], now[Calendar.MONTH], now[Calendar.DATE])
+            datePicker.show()
+        }
+
 
         builder.setPositiveButton(android.R.string.ok) { _, _ ->
-            var user = User(userId, name, age, "male", 0, "gsoignsigs", ArrayList())
+
+
+            //TEST:
+            var photoUrl2 = Utils.getSampleUserUrl()
+            val user = User(userId, name, photoUrl2, age, sex, 0, description)
             userRef.add(user)
         }
         builder.setNegativeButton(android.R.string.cancel, null) // :)
         builder.create().show()
     }
+
 
     override fun onStart() {
         super.onStart()
@@ -305,14 +345,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 if (fragment != null) {
                     supportFragmentManager.beginTransaction().detach(fragment).commit()
                     fab.hide()
-                    return@OnNavigationItemSelectedListener true
+
                 }
                 return@OnNavigationItemSelectedListener true
             }
-//            R.id.bottom_nav_messages -> {
-//
-//                return@OnNavigationItemSelectedListener true
-//            }
+            R.id.bottom_nav_messages -> {
+
+                return@OnNavigationItemSelectedListener true
+            }
         }
         false
     }
@@ -344,7 +384,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun editProfileDialog() {
-
+        launchUserProfileDialog()
     }
 
     override fun onEventOrgFragmentSelected(event: Event) {

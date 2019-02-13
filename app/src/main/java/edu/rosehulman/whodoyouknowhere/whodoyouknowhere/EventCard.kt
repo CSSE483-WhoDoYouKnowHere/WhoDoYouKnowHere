@@ -8,6 +8,7 @@ import android.widget.TextView
 import com.mindorks.placeholderview.SwipeDirection
 import com.mindorks.placeholderview.annotations.*
 import com.mindorks.placeholderview.annotations.swipe.*
+import com.squareup.picasso.Picasso
 import kotlin.math.sqrt
 
 
@@ -23,6 +24,11 @@ class EventCard(
 
     @View(R.id.event_name_text_view)
     lateinit var eventNameText: TextView
+    @View(R.id.event_type_text_view)
+    lateinit var eventTypeText: TextView
+
+    @View(R.id.event_desc_text_view)
+    lateinit var eventDescText: TextView
 
     @View(R.id.event_date_text_view)
     lateinit var eventDateText: TextView
@@ -39,15 +45,26 @@ class EventCard(
 
     @Resolve
     fun onResolved() {
-//        Picasso.get()
-//            .load(mUrl)
-//            .resize(800, 800)
-//            .centerInside()
-//            .into(profileImageView)
+        if(event.picUrl!="") {
+            Picasso.get()
+                .load(event.picUrl)
+                .resize(800, 800)
+                .centerInside()
+                .into(profileImageView)
+        }
+        else{
+            Picasso.get()
+                .load(Utils.getSampleEventUrl())
+                .resize(800, 800)
+                .centerInside()
+                .into(profileImageView)
+        }
 //        eventNameText.text = "${profile.name},  ${profile.age}"
         eventNameText.text = event.title
         eventLocationText.text = event.location
         eventDateText.text = System.currentTimeMillis().toString()
+        eventTypeText.text = event.eventType
+        eventDescText.text = event.description
         swipeView.alpha = 1f
     }
 

@@ -9,6 +9,7 @@ import com.google.firebase.firestore.Exclude
 data class User(
     val userID: String = "",
     var fullName: String = "",
+    var photoUrl: String = "",
     var age: Int = 0,
     var sex: String = "",
     var locationID: Int = 0,
@@ -19,13 +20,14 @@ data class User(
     var eventsDeniedFrom: ArrayList<Event> = arrayListOf(Event())
 ) : Parcelable {
 
-//    @ServerTimestamp
+    //    @ServerTimestamp
 //    var timestamp: Timestamp? = null
     @get: Exclude
     var id = ""
 
 
     constructor(parcel: Parcel) : this(
+        parcel.readString(),
         parcel.readString(),
         parcel.readString(),
         parcel.readInt(),
@@ -42,6 +44,7 @@ data class User(
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(userID)
         parcel.writeString(fullName)
+        parcel.readString()
         parcel.writeInt(age)
         parcel.writeString(sex)
         parcel.writeInt(locationID)
