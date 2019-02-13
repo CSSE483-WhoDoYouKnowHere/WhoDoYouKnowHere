@@ -41,7 +41,7 @@ class EventOrgAdapter(val context: Context?, var uid: String, val listener: Even
     }
 
     fun addEventSnapshotListener() {
-        eventsRef.orderBy("timeStamp", Query.Direction.ASCENDING)
+        eventsRef
             .addSnapshotListener { snapshot, fireStoreException ->
                 if (fireStoreException != null) {
                     Log.d(Constants.TAG, "Firebase error: $fireStoreException")
@@ -62,18 +62,19 @@ class EventOrgAdapter(val context: Context?, var uid: String, val listener: Even
             val event = Event.fromSnapshot(docChange.document)
             when (docChange.type) {
                 DocumentChange.Type.ADDED -> {
+                    Log.d(Constants.TAG,"Event: $event added")
                     eventsHosted.add(0, event)
                     notifyItemInserted(0)
                 }
                 DocumentChange.Type.REMOVED -> {
+                    Log.d(Constants.TAG,"Event: $event removed")
                     val position = eventsHosted.indexOf(event)
                     eventsHosted.removeAt(position)
                     notifyItemRemoved(position)
                 }
                 DocumentChange.Type.MODIFIED -> {
-                    //TODO: Look up it in Kotlin
+                    Log.d(Constants.TAG,"Event: $event modified")
                     val position = eventsHosted.indexOfFirst { event.id == it.id }
-                    //This line makes sure local is in sync with the database. WHY?
                     eventsHosted[position] = event
                     notifyItemChanged(position)
                 }
