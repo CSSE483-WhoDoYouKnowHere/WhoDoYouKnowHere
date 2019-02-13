@@ -8,12 +8,10 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.google.firebase.firestore.DocumentChange
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
-import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.firestore.*
 import com.mindorks.placeholderview.SwipeDecor
 import kotlinx.android.synthetic.main.fragment_attendee_list.view.*
+import kotlin.math.E
 
 
 // TODO: Rename parameter arguments, choose names that match
@@ -31,6 +29,9 @@ class AttendeeListFragment : Fragment() {
     private var isToUndo = false
     private var swipedUser: User? = null
     private var addingUser: Boolean = true
+    private var acceptedList = ArrayList<User>()
+    private var deniedList = ArrayList<User>()
+    private var applicantList = ArrayList<User>()
 
     private val userRef = FirebaseFirestore
         .getInstance()
@@ -81,12 +82,17 @@ class AttendeeListFragment : Fragment() {
                     //don't care
                 }
                 DocumentChange.Type.MODIFIED -> {
-                    if (addingUser && swipedUser != null) {
-                        event.acceptedList.add(swipedUser!!)
+                    if (addingUser) {
+                        Log.d(Constants.TAG, "$swipedUser added to the accepted list")
+                        val acceptedPosition = acceptedList.indexOfFirst { event.id == it.id }
+                        event.acceptedList[acceptedPosition] = swipedUser!!
                         event.applicantList.remove(swipedUser!!)
-                    } else if (!addingUser && swipedUser != null) {
-                        event.deniedList.add(swipedUser!!)
+                    } else if (!addingUser) {
+                        val deniedPosition = deniedList.indexOfFirst { event.id == it.id }
+                        event.deniedList[deniedPosition] = swipedUser!!
                         event.applicantList.remove(swipedUser!!)
+                        Log.d(Constants.TAG, "$swipedUser added to denied list")
+
                     }
                 }
             }
@@ -155,12 +161,34 @@ class AttendeeListFragment : Fragment() {
     fun onSwipeRight(user: User) {
         swipedUser = user
         addingUser = true
+        var event = Event()
+        eventsRef.document(eventId).get().addOnSuccessListener { snapshot: DocumentSnapshot ->
+            //            acceptedList = snapshot.toObject(Event::class.java)?.acceptedList ?: ArrayList<User>(0)
+//            acceptedList.add(user)
+//
+//            applicantList = snapshot.toObject(Event::class.java)?.applicantList ?: ArrayList<User>(0)
+//            applicantList.remove(user)
+            event = snapshot.toObject(Event::class.java) ?: Event()
 
+        }
+        event.acceptedList.add(user)
+        event.applicantList.remove(user)
+        eventsRef.document(eventId).set(event)
+//        eventsRef.document(eventId).set(applicantList)
+//        eventsRef.document(eventId).set(deniedList)
     }
 
     fun onSwipeLeft(user: User) {
         swipedUser = user
         addingUser = false
+        var event = Event()
+        eventsRef.document(eventId).get().addOnSuccessListener { snapshot: DocumentSnapshot ->
+            event = snapshot.toObject(Event::class.java) ?: Event()
+        }
+        event.deniedList.add(user)
+        event.applicantList.remove(user)
+        eventsRef.document(eventId).set(event)
+
 
     }
 

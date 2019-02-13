@@ -26,8 +26,8 @@ data class Event(
 ) : Parcelable {
 
 
-    @ServerTimestamp
-    var timeStamp: Timestamp? = null
+//    @ServerTimestamp
+//    var timeStamp: Timestamp? = null
     @get:Exclude
     var id = ""
 

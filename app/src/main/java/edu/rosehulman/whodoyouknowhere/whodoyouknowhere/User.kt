@@ -20,8 +20,8 @@ data class User(
     var eventsDeniedFrom: ArrayList<Event> = arrayListOf(Event())
 ) : Parcelable {
 
-    @ServerTimestamp
-    var timestamp: Timestamp? = null
+//    @ServerTimestamp
+//    var timestamp: Timestamp? = null
     @get: Exclude
     var id = ""
 
