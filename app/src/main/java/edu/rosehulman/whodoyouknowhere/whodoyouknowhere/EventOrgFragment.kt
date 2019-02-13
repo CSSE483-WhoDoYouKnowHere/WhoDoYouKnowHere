@@ -1,18 +1,14 @@
 package edu.rosehulman.whodoyouknowhere.whodoyouknowhere
 
 import android.content.Context
-import android.net.Uri
 import android.os.Bundle
 import android.support.v4.app.Fragment
-import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.google.firebase.auth.FirebaseAuth
-import kotlinx.android.synthetic.main.activity_event_org.*
-import kotlinx.android.synthetic.main.app_bar_event_org.*
 
 
 private lateinit var eventOrgAdapter: EventOrgAdapter

@@ -1,10 +1,8 @@
 package edu.rosehulman.whodoyouknowhere.whodoyouknowhere
 
-import android.app.DatePickerDialog
 import android.content.Intent
 import android.graphics.Point
 import android.os.Bundle
-import android.support.annotation.NonNull
 import android.support.design.widget.BottomNavigationView
 import android.support.design.widget.FloatingActionButton
 import android.support.design.widget.NavigationView
@@ -19,20 +17,14 @@ import android.support.v7.widget.helper.ItemTouchHelper
 import android.util.Log
 import android.view.*
 import android.widget.Toast
-import com.google.android.gms.tasks.OnCompleteListener
-import com.google.android.gms.tasks.Task
-import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.QuerySnapshot
 import com.mindorks.placeholderview.SwipeDecor
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.add_user_dialog.view.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.android.synthetic.main.nav_header_main.view.*
-import java.util.*
-import kotlin.collections.ArrayList
 
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener,
@@ -67,8 +59,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         if (isNewUser) {
             Log.d(Constants.TAG, "New User $currentUser detected. Launching User Profile Dialog")
-            launchUserProfileDialog()
-
         }
     }
 
@@ -80,7 +70,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         bottom_nav_view.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
         initializeListeners()
-
+        if (isNewUser) {
+            launchUserProfileDialog()
+        }
         val extras = intent.extras
         if (extras != null) {
             uid = extras.getString(Constants.UID)
@@ -163,28 +155,32 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     fun launchUserProfileDialog() {
-        var builder = AlertDialog.Builder(this)
+        val builder = AlertDialog.Builder(this)
         builder.setTitle(getString(R.string.user_profile_dialog_title))
         val view = LayoutInflater.from(this).inflate(R.layout.add_user_dialog, null, false)
         builder.setView(view)
 
         val userId = uid.toString()
         val name = view.user_name_edit_text.text.toString()
-        val sexSpinner = view.sex_drop_down
-
-        val dateButton = view.select_date_button
+//        val sexSpinner = view.sex_drop_down
+//
+//        val dateButton = view.select_date_button
         val age: Int = 9
-        dateButton.setOnClickListener {
-            val now = Calendar.getInstance()
-            val datePicker = DatePickerDialog(this, DatePickerDialog.OnDateSetListener { picker, year, month, day ->
-                picker
-            }, now[Calendar.YEAR - ageMinimum], now[Calendar.MONTH], now[Calendar.DATE])
-            datePicker.show()
+//        dateButton.setOnClickListener {
+//            val now = Calendar.getInstance()
+//            val datePicker = DatePickerDialog(this, DatePickerDialog.OnDateSetListener { picker, year, month, day ->
+//                picker
+//            }, now[Calendar.YEAR - ageMinimum], now[Calendar.MONTH], now[Calendar.DATE])
+//            datePicker.show()
+//        }
+
+        builder.setPositiveButton(android.R.string.ok) { _, _ ->
+            var user = User(userId, name, age, "male", 0, "gsoignsigs", ArrayList())
+            userRef.add(user)
         }
+        builder.setNegativeButton(android.R.string.cancel, null) // :)
 
 
-        var user = User(userId, name, age, "male", 0, "gsoignsigs", ArrayList())
-        userRef.add(user)
         builder.create().show()
     }
 

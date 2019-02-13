@@ -2,10 +2,8 @@ package edu.rosehulman.whodoyouknowhere.whodoyouknowhere
 
 import android.os.Parcel
 import android.os.Parcelable
-import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.Exclude
-import com.google.firebase.firestore.ServerTimestamp
 
 data class User(
     val userID: String = "",
@@ -20,8 +18,8 @@ data class User(
     var eventsDeniedFrom: ArrayList<Event> = arrayListOf(Event())
 ) : Parcelable {
 
-    @ServerTimestamp
-    var timestamp: Timestamp? = null
+//    @ServerTimestamp
+//    var timestamp: Timestamp? = null
     @get: Exclude
     var id = ""
 

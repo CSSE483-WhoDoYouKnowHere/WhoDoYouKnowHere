@@ -7,14 +7,11 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.*
+import com.google.firebase.firestore.DocumentChange
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.QuerySnapshot
 import kotlinx.android.synthetic.main.add_event_dialog.view.*
-import kotlin.collections.ArrayList
-import android.R.attr.fragment
-import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentActivity
-import android.support.v4.app.FragmentManager
 
 
 class EventOrgAdapter(val context: Context?, var uid: String, val listener: EventOrgFragment.OnEventOrgFragmentSelectedListener?) : RecyclerView.Adapter<EventOrgViewHolder>() {

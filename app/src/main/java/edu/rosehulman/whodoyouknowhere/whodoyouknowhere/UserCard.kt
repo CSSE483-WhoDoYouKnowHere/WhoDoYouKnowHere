@@ -1,15 +1,12 @@
 package edu.rosehulman.whodoyouknowhere.whodoyouknowhere
 
-import android.content.Context
 import android.graphics.Point
 import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
-import com.bumptech.glide.Glide
 import com.mindorks.placeholderview.SwipeDirection
 import com.mindorks.placeholderview.annotations.*
 import com.mindorks.placeholderview.annotations.swipe.*
-import jp.wasabeef.glide.transformations.RoundedCornersTransformation
 import kotlin.math.sqrt
 
 @Layout(R.layout.card_user_view)

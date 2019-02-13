@@ -24,11 +24,6 @@
                 android:label="@string/title_name"
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
-        <activity
-                android:name=".EventOrgActivity"
-                android:label="@string/title_activity_event_org"
-                android:theme="@style/AppTheme.NoActionBar">
-        </activity>
     </application>
 
 </manifest>

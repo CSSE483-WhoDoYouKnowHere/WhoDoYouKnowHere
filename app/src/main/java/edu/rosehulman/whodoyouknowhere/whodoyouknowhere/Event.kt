@@ -2,11 +2,8 @@ package edu.rosehulman.whodoyouknowhere.whodoyouknowhere
 
 import android.os.Parcel
 import android.os.Parcelable
-import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.Exclude
-import com.google.firebase.firestore.ServerTimestamp
-import kotlin.collections.ArrayList
 
 
 data class Event(
@@ -26,8 +23,8 @@ data class Event(
 ) : Parcelable {
 
 
-    @ServerTimestamp
-    var timeStamp: Timestamp? = null
+//    @ServerTimestamp
+//    var timeStamp: Timestamp? = null
     @get:Exclude
     var id = ""
 
