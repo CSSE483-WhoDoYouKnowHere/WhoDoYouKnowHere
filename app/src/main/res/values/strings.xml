@@ -16,7 +16,7 @@
     <string name="add_dialog_toggle_off">No</string>
     <string name="title_activity_login">LoginActivity</string>
     <string name="back_button_exit_toast">Press the back button once again to close the application.</string>
-    <string name="user_profile_dialog_title">User Profile</string>
+    <string name="user_profile_dialog_title">Create User Profile</string>
     <string-array name="sex_array">
         <item>Male</item>
         <item>Female</item>
@@ -25,4 +25,6 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="welcome_new_text">Welcome %1$s!</string>
+    <string name="welcome_text">Welcome Back %1$s!</string>
 </resources>

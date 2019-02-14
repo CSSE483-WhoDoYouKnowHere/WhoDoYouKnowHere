@@ -14,20 +14,20 @@
             android:orientation="horizontal">
 
         <ImageButton
-                android:id="@+id/rejectBtn"
+                android:id="@+id/rejectBtn2"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:background="@drawable/ic_add_white_24dp" />
 
         <ImageButton
-                android:id="@+id/acceptBtn"
+                android:id="@+id/acceptBtn2"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:layout_marginLeft="30dp"
                 android:background="@drawable/ic_account_circle" />
 
         <ImageButton
-                android:id="@+id/undoBtn"
+                android:id="@+id/undoBtn2"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:layout_marginLeft="30dp"
