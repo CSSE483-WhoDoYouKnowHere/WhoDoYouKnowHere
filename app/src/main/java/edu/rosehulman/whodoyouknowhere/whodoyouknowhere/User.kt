@@ -5,69 +5,61 @@ import android.os.Parcel
 import android.os.Parcelable
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.Exclude
+import kotlinx.android.parcel.Parcelize
 
+//TODO: Map event IDs to true/false values
+
+@Parcelize
 data class User(
-    val userID: String = "",
+    var authID: String ="",
+    var userID: String = "",
     var fullName: String = "",
     var photoUrl: String = "",
     var age: Int = 0,
     var sex: String = "",
     var locationID: Int = 0,
     var description: String = "",
-    var eventsHosting: ArrayList<Event> = arrayListOf(Event()),
-    var eventsAppliedTo: ArrayList<Event> = arrayListOf(Event()),
-    var eventsAcceptedTo: ArrayList<Event> = arrayListOf(Event()),
-    var eventsDeniedFrom: ArrayList<Event> = arrayListOf(Event())
+    var eventMap: MutableMap<String, Int> = mutableMapOf()
+//    var eventsHosting: Map<String, Boolean>? = null,
+//    var eventsAppliedTo: Map<String, Boolean>? = null,
+//    var eventsAcceptedTo: Map<String, Boolean>? = null,
+//    var eventsDeniedFrom: Map<String, Boolean>? = null
 ) : Parcelable {
 
-    //    @ServerTimestamp
-//    var timestamp: Timestamp? = null
+//    //    @ServerTimestamp
+////    var timestamp: Timestamp? = null
     @get: Exclude
     var id = ""
-
-
-    constructor(parcel: Parcel) : this(
-        parcel.readString(),
-        parcel.readString(),
-        parcel.readString(),
-        parcel.readInt(),
-        parcel.readString(),
-        parcel.readInt(),
-        parcel.readString(),
-        parcel.createTypedArrayList(Event.CREATOR),
-        parcel.createTypedArrayList(Event.CREATOR),
-        parcel.createTypedArrayList(Event.CREATOR),
-        parcel.createTypedArrayList(Event.CREATOR)
-    ) {
-    }
-
-    override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeString(userID)
-        parcel.writeString(fullName)
-        parcel.readString()
-        parcel.writeInt(age)
-        parcel.writeString(sex)
-        parcel.writeInt(locationID)
-        parcel.writeString(description)
-        parcel.writeTypedList(eventsHosting)
-        parcel.writeTypedList(eventsAppliedTo)
-        parcel.writeTypedList(eventsAcceptedTo)
-        parcel.writeTypedList(eventsDeniedFrom)
-
-    }
-
-    override fun describeContents(): Int {
-        return 0
-    }
-
-    companion object CREATOR : Parcelable.Creator<User> {
-        override fun createFromParcel(parcel: Parcel): User {
-            return User(parcel)
-        }
-
-        override fun newArray(size: Int): Array<User?> {
-            return arrayOfNulls(size)
-        }
+//
+//
+//    constructor(parcel: Parcel) : this(
+//        parcel.readString(),
+//        parcel.readString(),
+//        parcel.readString(),
+//        parcel.readInt(),
+//        parcel.readString(),
+//        parcel.readInt(),
+//        parcel.readString(),
+//    ) {
+//    }
+//
+//    override fun writeToParcel(parcel: Parcel, flags: Int) {
+//        parcel.writeString(userID)
+//        parcel.writeString(fullName)
+//        parcel.readString()
+//        parcel.writeInt(age)
+//        parcel.writeString(sex)
+//        parcel.writeInt(locationID)
+//        parcel.writeString(description)
+//
+//
+//    }
+//
+//    override fun describeContents(): Int {
+//        return 0
+//    }
+//
+    companion object  {
 
         fun fromSnapshot(snapshot: DocumentSnapshot): User {
             val user = snapshot.toObject(User::class.java)!!
@@ -75,6 +67,4 @@ data class User(
             return user
         }
     }
-
-
 }

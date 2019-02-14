@@ -58,14 +58,13 @@ class LoginActivity : AppCompatActivity() {
             if (user == null) {
                 launchLoginUI()
             } else {
-                switchToMainActivity(user.uid)
+                switchToMainActivity()
             }
         }
     }
 
-    private fun switchToMainActivity(uid: String) {
+    private fun switchToMainActivity() {
         val intent = Intent(this, MainActivity::class.java)
-        intent.putExtra(Constants.UID, uid)
         finish()
         startActivity(intent)
     }

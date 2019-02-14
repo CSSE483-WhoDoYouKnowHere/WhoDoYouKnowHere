@@ -11,7 +11,11 @@ import android.view.ViewGroup
 import com.google.firebase.firestore.*
 import com.mindorks.placeholderview.SwipeDecor
 import kotlinx.android.synthetic.main.card_user_view.view.*
+import kotlinx.android.synthetic.main.content_main.*
+import kotlinx.android.synthetic.main.content_main.view.*
+import kotlinx.android.synthetic.main.fragment_attendee_list.*
 import kotlinx.android.synthetic.main.fragment_attendee_list.view.*
+import kotlin.math.E
 
 
 // TODO: Rename parameter arguments, choose names that match
@@ -29,9 +33,7 @@ class AttendeeListFragment : Fragment() {
     private var isToUndo = false
     private var swipedUser: User? = null
     private var addingUser: Boolean = true
-    private var acceptedList = ArrayList<User>()
-    private var deniedList = ArrayList<User>()
-    private var applicantList = ArrayList<User>()
+    private var cardViewHolderSize: Point? = null
 
     private val userRef = FirebaseFirestore
         .getInstance()
@@ -41,6 +43,13 @@ class AttendeeListFragment : Fragment() {
         .collection(Constants.EVENTS_COLLECTION)
 
     private lateinit var eventId: String
+
+    init {
+//        this.addEventSnapshotListener()
+//        this.addUserSnapshotListener()
+
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
@@ -49,99 +58,6 @@ class AttendeeListFragment : Fragment() {
         }
 
     }
-
-    fun addEventSnapshotListener() {
-        eventsRef.orderBy("timeStamp", Query.Direction.ASCENDING)
-            .addSnapshotListener { snapshot, fireStoreException ->
-                if (fireStoreException != null) {
-                    Log.d(Constants.TAG, "Firebase error: $fireStoreException")
-                    return@addSnapshotListener
-                }
-
-                processEventSnapshotDiffs(snapshot!!)
-
-            }
-    }
-
-//    fun addUserSnapshotListener() {
-//        userRef.orderBy("timeStamp", Query.Direction.ASCENDING)
-//            .addSnapshotListener { snapshot, fireStoreException ->
-//                if (fireStoreException != null) {
-//                    Log.d(Constants.TAG, "Firebase error: $fireStoreException")
-//                    return@addSnapshotListener
-//                }
-//
-//                processUserSnapshotDiffs(snapshot!!)
-//
-//            }
-//    }
-
-
-    init {
-        this.addEventSnapshotListener()
-//        this.addUserSnapshotListener()
-    }
-
-
-    private fun processEventSnapshotDiffs(snapshot: QuerySnapshot) {
-        for (docChange in snapshot.documentChanges) {
-            val event = Event.fromSnapshot(docChange.document)
-            when (docChange.type) {
-                DocumentChange.Type.ADDED -> {
-                    //don't care
-                }
-                DocumentChange.Type.REMOVED -> {
-                    //don't care
-                }
-                DocumentChange.Type.MODIFIED -> {
-                    if (addingUser) {
-                        Log.d(Constants.TAG, "$swipedUser added to the accepted list")
-                        // val acceptedPosition = acceptedList.indexOfFirst { event.id == it.id }
-                        // event.acceptedList[acceptedPosition] = swipedUser!!
-                        if (eventId == event.id) {
-                            event.acceptedList.add(swipedUser!!)
-                            event.applicantList.remove(swipedUser!!)
-                        }
-                    } else if (!addingUser) {
-                        val deniedPosition = deniedList.indexOfFirst { event.id == it.id }
-                        event.deniedList[deniedPosition] = swipedUser!!
-                        event.applicantList.remove(swipedUser!!)
-                        Log.d(Constants.TAG, "$swipedUser added to denied list")
-
-                    }
-                }
-            }
-        }
-    }
-
-//    private fun processUserSnapshotDiffs(snapshot: QuerySnapshot) {
-//        for (docChange in snapshot.documentChanges) {
-//            val user = User.fromSnapshot(docChange.document)
-//            when (docChange.type) {
-//                DocumentChange.Type.ADDED -> {
-//                    //don't care
-//                }
-//                DocumentChange.Type.REMOVED -> {
-//                    //don't care
-//                }
-//                DocumentChange.Type.MODIFIED -> {
-//                    var event = Event()
-//                    eventsRef.document(eventId).get().addOnSuccessListener { snapshot: DocumentSnapshot ->
-//                        event = snapshot.toObject(Event::class.java) ?: Event()
-//                    }
-//                    if (addingUser) {
-//                        Log.d(Constants.TAG, "$swipedUser added to the accepted list")
-//                        user.eventsAcceptedTo.add(event)
-//                        user.eventsAppliedTo.remove(event)
-//                    } else if (!addingUser) {
-//                        user.eventsDeniedFrom.add(event)
-//                        user.eventsAppliedTo.remove(event)
-//
-//                    }
-//                }
-//            }
-//        }
-//    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -176,21 +92,35 @@ class AttendeeListFragment : Fragment() {
             )
 
 
-        val cardViewHolderSize = Point(windowSize.x, windowSize.y - bottomMargin)
+        cardViewHolderSize = Point(windowSize.x, windowSize.y - bottomMargin)
 
-        for (user in Utils.getSampleUsers()) {
-
-
-            var userCard = UserCard(this, user, cardViewHolderSize)
-            view.swipe_on_user!!.addView(userCard)
-
+        eventsRef.document(eventId).get().addOnSuccessListener { snapshot ->
+            //val userMap: MutableMap<String,Int> = snapshot["userMap"] as MutableMap<String, Int>
+            if (snapshot.toObject(Event::class.java) != null) {
+                val tempUser = snapshot.toObject(Event::class.java)
+                val userMap = tempUser!!.userMap
+                for (applicantId: String in userMap.keys) {
+                    if (userMap[applicantId] as Int == Constants.APPLIED) {
+                        val user: User? = getUserFromId(applicantId)
+                        if (user != null) {
+                            view!!.swipe_on_user.addView(UserCard(this, user, cardViewHolderSize!!))
+                        } else {
+                            Log.d(Constants.TAG, "User $user is NULL")
+                        }
+                    }
+                }
+            }
         }
 
-//        rejectBtn.setOnClickListener({ view.swipe_on_user!!.doSwipe(false) })
-//
-//        acceptBtn.setOnClickListener({ view.swipe_on_user!!.doSwipe(true) })
-//
-//        undoBtn.setOnClickListener({ view.swipe_on_user!!.undoLastSwipe() })
+        for (user in Utils.getSampleUsers()) {
+            view.swipe_on_user.addView(UserCard(this, user, cardViewHolderSize!!))
+        }
+
+        view.rejectBtn2.setOnClickListener({ view.swipe_on_user!!.doSwipe(false) })
+
+        view.acceptBtn2.setOnClickListener({ view.swipe_on_user!!.doSwipe(true) })
+
+        view.undoBtn2.setOnClickListener({ view.swipe_on_user!!.undoLastSwipe() })
 
         view.swipe_on_user!!.addItemRemoveListener {
             if (isToUndo) {
@@ -202,41 +132,50 @@ class AttendeeListFragment : Fragment() {
         return view
     }
 
-    fun onSwipeRight(user: User) {
-        swipedUser = user
-        addingUser = true
-        var event = Event()
-        eventsRef.document(eventId).get().addOnSuccessListener { snapshot: DocumentSnapshot ->
-            event = snapshot.toObject(Event::class.java) ?: Event()
-
+    fun getUserFromId(id: String): User? {
+        var returnUser: User? = null
+        userRef.document(id).get().addOnSuccessListener { snapshot ->
+            if (snapshot.toObject(User::class.java) != null) {
+                returnUser = snapshot.toObject(User::class.java)!!
+            }
         }
-        event.acceptedList.add(user)
-        event.applicantList.remove(user)
-        eventsRef.document(eventId).set(event)
+        return returnUser
+    }
 
-//        swipedUser!!.eventsAcceptedTo.add(event)
-//        swipedUser!!.eventsAppliedTo.remove(event)
-//        userRef.document(swipedUser!!.id).set(swipedUser!!)
+    fun getEventFromId(id: String): Event? {
+        var returnEvent: Event? = null
+        eventsRef.document(id).get().addOnSuccessListener { snapshot ->
+            if (snapshot.toObject(Event::class.java) != null) {
+                returnEvent = snapshot.toObject(Event::class.java)!!
+            }
+        }
+        return returnEvent
+    }
+
+    fun onSwipeRight(user: User) {
+
+//        user.eventMap[eventId] = Constants.ACCEPTED
+//        userRef.document(user.userID).set(user)
+//        Log.d(Constants.ATTENDEE_SWIPE, "User ${user.fullName}'s  Current Event Mapping: ${user.eventMap[eventId]}")
+//
+//        val event = getEventFromId(eventId)
+//        event!!.userMap[user.userID] = Constants.ACCEPTED
+//        eventsRef.document(event.eventID).set(event)
+//        Log.d(Constants.ATTENDEE_SWIPE, "Event ${event.title}'s  Current User Mapping: ${event.userMap[user.userID]}")
+
 
     }
 
     fun onSwipeLeft(user: User) {
-        swipedUser = user
-        addingUser = false
-        var event: Event? = null
-        eventsRef.document(eventId).get().addOnSuccessListener { snapshot: DocumentSnapshot ->
-            event = snapshot.toObject(Event::class.java)
-        }
-        Log.d(Constants.TAG, "Event is $event")
-        if (event != null) {
-            event?.deniedList?.add(user)
-            event?.applicantList?.remove(user)
-            eventsRef.document(eventId).set(event!!)
-        }
 
-//        swipedUser!!.eventsDeniedFrom.add(event)
-//        swipedUser!!.eventsAppliedTo.remove(event)
-//        userRef.document(swipedUser!!.id).set(swipedUser!!)
+//        user.eventMap[eventId] = Constants.DENIED
+//        userRef.document(user.userID).set(user)
+//        Log.d(Constants.ATTENDEE_SWIPE, "User ${user.fullName}'s  Current Event Mapping: ${user.eventMap[eventId]}")
+//
+//        val event = getEventFromId(eventId)
+//        event!!.userMap[user.userID] = Constants.DENIED
+//        eventsRef.document(event.eventID).set(event)
+//        Log.d(Constants.ATTENDEE_SWIPE, "Event ${event.title}'s  Current User Mapping: ${event.userMap[user.userID]}")
 
     }
 

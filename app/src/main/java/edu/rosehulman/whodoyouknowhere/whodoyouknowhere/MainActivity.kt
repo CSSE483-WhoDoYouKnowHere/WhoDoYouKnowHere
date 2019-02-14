@@ -19,18 +19,13 @@ import android.widget.ArrayAdapter
 import android.widget.Spinner
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.DocumentChange
-import com.google.firebase.firestore.FieldPath
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.QuerySnapshot
-import com.google.type.Date
+import com.google.firebase.firestore.*
 import com.mindorks.placeholderview.SwipeDecor
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.add_user_dialog.view.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.android.synthetic.main.nav_header_main.view.*
-import java.net.URL
 import java.util.*
 
 
@@ -45,14 +40,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private var isToUndo = false
     private lateinit var cardViewHolderSize: Point
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
-    private val user = auth.currentUser
+    private val authID: String? = auth.currentUser?.uid
+    private var user: User? = null
 
     lateinit var authListener: FirebaseAuth.AuthStateListener
-    private var uid: String? = null
     private var backButtonCount = 0
-    private val ageMinimum = 18
 
     private var eventList: ArrayList<Event> = ArrayList()
+
+
     private val userRef = FirebaseFirestore
         .getInstance()
         .collection(Constants.USERS_COLLECTION)
@@ -63,16 +59,55 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     init {
 
-        val currentUser = user!!.metadata
-        isNewUser = currentUser!!.creationTimestamp == currentUser.lastSignInTimestamp
+//        userRef.whereEqualTo("authID", auth.currentUser!!.uid).get().addOnSuccessListener {
+//            for(user in it.documents){
+//                this.user = user.toObject(User::class.java)
+//            }
+//        }
 
-        Log.d(Constants.DEBUG, "CreationDate: ${currentUser.creationTimestamp}")
-        Log.d(Constants.DEBUG, "LastSignIn: ${currentUser.lastSignInTimestamp}")
 
-        if (isNewUser) {
-            Log.d(Constants.TAG, "New User ${user.uid} detected. Launching User Profile Dialog")
-        }
-        Log.d(Constants.TAG, "UID is: ${auth.currentUser!!.uid}")
+//        userRef.whereEqualTo("authID", authID).get().addOnSuccessListener { snapshot ->
+//            if (snapshot.isEmpty) {
+//                isNewUser = true
+//                Log.d(Constants.TAG, "New User with AUTH UID: ${authID} detected.")
+//            } else {
+//                isNewUser = false
+//                Log.d(Constants.TAG, "Existing AUTH UID is: ${authID}")
+//                for(doc in snapshot.documents){
+//                    var docUser = User.fromSnapshot(doc)
+//                    if(docUser.authID==authID){
+//                        user = docUser
+//                    }
+//                }
+//            }
+//        }
+
+//        val currentUser = auth.currentUser!!.metadata
+//        isNewUser = currentUser!!.creationTimestamp == currentUser.lastSignInTimestamp
+//
+//        Log.d(Constants.DEBUG, "CreationDate: ${currentUser.creationTimestamp}")
+//        Log.d(Constants.DEBUG, "LastSignIn: ${currentUser.lastSignInTimestamp}")
+//
+//        if (isNewUser) {
+//            Log.d(Constants.TAG, "New User with AUTH UID: ${auth.currentUser!!.uid} detected.")
+//        }
+//        Log.d(Constants.TAG, "Existing AUTH UID is: ${auth.currentUser!!.uid}")
+//
+//        user = User()
+
+//        userRef.addSnapshotListener { snapshot, fireStoreException ->
+//            if (fireStoreException != null) {
+//                Log.d(Constants.TAG, "Firebase error: $fireStoreException")
+//                return@addSnapshotListener
+//            }
+//        userRef.add(user!!).addOnSuccessListener {
+//            Log.d(Constants.TAG, "User added with ID: ${it.id}")
+//            user!!.userID = it.id
+//            userRef.document(it.id).set(user!!)
+//        }
+
+        //  }
+
         this.addEventSnapshotListener()
     }
 
@@ -90,31 +125,42 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     fun processEventSnapshotDiffs(snapshot: QuerySnapshot) {
 
-        for (documentChange in snapshot.documentChanges) {
-            val event = Event.fromSnapshot(documentChange.document)
-            when (documentChange.type) {
-                DocumentChange.Type.ADDED -> {
-                    Log.d(Constants.TAG, "Adding $event")
-                    eventList.add(0, event)
+            for (documentChange in snapshot.documentChanges) {
+
+                val event = Event.fromSnapshot(documentChange.document)
+
+                when (documentChange.type) {
+                    DocumentChange.Type.ADDED -> {
+                       // if (!event.userMap.containsKey(user!!.userID)) {
+
+                            Log.d(Constants.TAG, "Adding $event in Main")
+                            eventList.add(0, event)
+                        //}
+
+                    }
+                    DocumentChange.Type.REMOVED -> {
+                      //   if (!event.userMap.containsKey(user!!.userID)) {
+                        Log.d(Constants.TAG, "Removing $event in Main")
+                        val index = eventList.indexOfFirst { it.id == event.id }
+                        eventList.removeAt(index)
+                   // }
+                    }
+                    DocumentChange.Type.MODIFIED -> {
+                      //   if ( !event.userMap.containsKey(user!!.userID)) {
+                        Log.d(Constants.TAG, "Modifying $event in Main")
+                        val index = eventList.indexOfFirst { it.id == event.id }
+                        eventList[index] = event
+                       //  }
+                    }
                 }
-                DocumentChange.Type.REMOVED -> {
-                    Log.d(Constants.TAG, "Removing $event")
-                    val index = eventList.indexOfFirst { it.id == event.id }
-                    eventList.removeAt(index)
-                }
-                DocumentChange.Type.MODIFIED -> {
-                    Log.d(Constants.TAG, "Modifying $event")
-                    val index = eventList.indexOfFirst { it.id == event.id }
-                    eventList[index] = event
-                }
-            }
+
+
         }
-        Log.d(Constants.TAG, "EventList: ${eventList}")
+        swipeView.removeAllViews()
         for (event in eventList) {
             swipeView!!.addView(EventCard(this, event, cardViewHolderSize))
         }
-
-
+        Log.d(Constants.TAG, "EventList: ${eventList}")
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -124,12 +170,31 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         bottom_nav_view.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
         initializeListeners()
-        if (isNewUser) {
-            launchUserProfileDialog()
+
+
+        var name: String
+        auth.currentUser.let {
+            name = auth.currentUser!!.displayName!!
         }
-        val extras = intent.extras
-        if (extras != null) {
-            uid = extras.getString(Constants.UID)
+
+        userRef.whereEqualTo("authID", authID).get().addOnSuccessListener { snapshot ->
+            if (snapshot.isEmpty) {
+                isNewUser = true
+                Toast.makeText(this, getString(R.string.welcome_new_text, name), Toast.LENGTH_SHORT).show()
+                user = User()
+                launchUserProfileDialog(name)
+                Log.d(Constants.TAG, "New User with AUTH UID: ${authID} detected.")
+            } else {
+                isNewUser = false
+                Toast.makeText(this, getString(R.string.welcome_text, name), Toast.LENGTH_SHORT).show()
+                Log.d(Constants.TAG, "Existing AUTH UID is: ${authID}")
+                for (doc in snapshot.documents) {
+                    var docUser = User.fromSnapshot(doc)
+                    if (docUser.authID == authID) {
+                        user = docUser
+                    }
+                }
+            }
         }
 
         val bottomMargin = Utils.dpToPx(margin)
@@ -156,7 +221,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         cardViewHolderSize = Point(windowSize.x, windowSize.y - bottomMargin)
 
-        //TEST: Utils.getSampleEvents()
+
+//        //TEST: Utils.getSampleEvents()
 //        for (event in eventList) {
 //            swipeView!!.addView(EventCard(this, event, cardViewHolderSize))
 //        }
@@ -179,7 +245,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val toggle = ActionBarDrawerToggle(
             this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
         )
-
 
         drawer_layout.addDrawerListener(
             object : DrawerLayout.DrawerListener {
@@ -209,15 +274,63 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         nav_view.setNavigationItemSelectedListener(this)
     }
 
+
     fun onSwipeLeft(event: Event) {
-        Log.d(Constants.TAG, "EventList: ${eventList}")
+
+
+        Log.d(Constants.SWIPE, "Current User ${user}")
+        user!!.eventMap[event.eventID] = Constants.DENIED
+        Log.d(Constants.SWIPE, "Event ID : ${event.eventID}")
+        Log.d(Constants.SWIPE, "EventMap : ${user!!.eventMap}")
+        userRef.document(user!!.userID).set(user!!)
+
+
+//        var currentUser: User?
+//        userRef.document(user!!.userID).get().addOnSuccessListener { document: DocumentSnapshot ->
+//            currentUser = document.toObject(User::class.java)
+//            Log.d(Constants.SWIPE, "Current User ${currentUser}")
+//
+//            currentUser!!.eventMap[event.eventID] = Constants.DENIED
+//
+//            Log.d(Constants.SWIPE, "Event ID : ${event.eventID}")
+//            Log.d(Constants.SWIPE, "EventMap : ${currentUser!!.eventMap}")
+//
+//            userRef.document(user!!.userID).set(currentUser!!)
+//        }
+
+        Log.d(Constants.SWIPE, "Current Event $event")
+        event.userMap[user!!.userID] = Constants.DENIED
+        Log.d(Constants.SWIPE, "User ID ${user!!.userID}")
+        Log.d(Constants.SWIPE, "UserMap ${event.userMap}")
+        eventsRef.document(event.eventID).set(event)
+        // var currentEvent: Event?
+//        eventsRef.document(event.eventID).get().addOnSuccessListener {
+//            currentEvent = it.toObject(Event::class.java)
+//            Log.d(Constants.SWIPE, "Current Event $currentEvent")
+//            currentEvent!!.userMap!![user!!.userID] = Constants.DENIED
+//            Log.d(Constants.SWIPE, "User ID ${user!!.userID}")
+//            Log.d(Constants.SWIPE, "UserMap ${currentEvent!!.userMap}")
+//
+//            eventsRef.document(event.eventID).set(currentEvent!!)
+//
+//        }
     }
 
     fun onSwipeRight(event: Event) {
-        Log.d(Constants.TAG, "EventList: ${eventList}")
+        Log.d(Constants.SWIPE, "Current User ${user}")
+        user!!.eventMap[event.eventID] = Constants.APPLIED
+        Log.d(Constants.SWIPE, "Event ID : ${event.eventID}")
+        Log.d(Constants.SWIPE, "EventMap : ${user!!.eventMap}")
+        userRef.document(user!!.userID).set(user!!)
+
+        Log.d(Constants.SWIPE, "Current Event $event")
+        event.userMap[user!!.userID] = Constants.APPLIED
+        Log.d(Constants.SWIPE, "User ID ${user!!.userID}")
+        Log.d(Constants.SWIPE, "UserMap ${event.userMap}")
+        eventsRef.document(event.eventID).set(event)
     }
 
-    fun launchUserProfileDialog() {
+    fun launchUserProfileDialog(name: String) {
         val builder = AlertDialog.Builder(this)
         builder.setTitle(getString(R.string.user_profile_dialog_title))
         val view = LayoutInflater.from(this).inflate(R.layout.add_user_dialog, null, false)
@@ -234,38 +347,43 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
         spinner.onItemSelectedListener
 
-        var sex = spinner.selectedItem.toString()
-        val userId = user!!.uid
-        var name: String
-        var photoUrl: Uri?
-        var provider: String
+        val sex = spinner.selectedItem.toString()
 
-        user.let {
-            name = user.displayName!!
-            photoUrl = user.photoUrl
-            provider = user.providerId
+        var photoUrl: String = ""
+        var uri: Uri?
+        auth.currentUser.let {
+            uri = auth.currentUser!!.photoUrl
         }
-        var description = view.user_description_edit_text.text.toString()
 
+        if (uri != null) {
+            //setup user picture from that somehow
+        } else {
+            photoUrl = Utils.getSampleUserUrl()
+        }
+        val description = view.user_description_edit_text.text.toString()
         var age: Int = 0
+
         val dateButton = view.select_date_button
+
         dateButton.setOnClickListener {
             val now = Calendar.getInstance()
             val datePicker = DatePickerDialog(this, DatePickerDialog.OnDateSetListener { picker, mYear, mMonth, mDay ->
-                age =  mYear
-                view.select_date_button.text = "Age: ${age.toString()}"
+                age = now.get(Calendar.YEAR) - mYear
+                Log.d(Constants.TAG, "Age: $age")
+                view.select_date_button.text = "Age: $age"
             }, now[Calendar.YEAR], now[Calendar.MONTH], now[Calendar.DATE])
             datePicker.show()
         }
 
-
         builder.setPositiveButton(android.R.string.ok) { _, _ ->
-
-
             //TEST:
-            var photoUrl2 = Utils.getSampleUserUrl()
-            val user = User(userId, name, photoUrl2, age, sex, 0, description)
-            userRef.add(user)
+            user = User(authID!!, "", name, photoUrl, age, sex, 0, description)
+
+            userRef.add(user!!).addOnSuccessListener {
+                Log.d(Constants.TAG, "Dialog is adding user ID: ${it.id}")
+                user!!.userID = it.id
+                userRef.document(it.id).set(user!!)
+            }
         }
         builder.setNegativeButton(android.R.string.cancel, null) // :)
         builder.create().show()
@@ -336,7 +454,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             R.id.bottom_nav_event_org -> {
                 // startEventOrgActivity(uid!!)
                 val ft = supportFragmentManager.beginTransaction()
-                ft.replace(R.id.main_fragment_layout, EventOrgFragment(), Constants.EVENT_ORG_FRAGMENT)
+
+                Log.d(Constants.TAG, "EventOrgFragment launching with user: $user with ID: ${user!!.userID}")
+                ft.replace(
+                    R.id.main_fragment_layout,
+                    EventOrgFragment.newInstance(user!!.userID),
+                    Constants.EVENT_ORG_FRAGMENT
+                )
                 ft.commit()
                 return@OnNavigationItemSelectedListener true
             }
@@ -384,7 +508,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun editProfileDialog() {
-        launchUserProfileDialog()
+        launchUserProfileDialog(auth.currentUser!!.displayName!!)
     }
 
     override fun onEventOrgFragmentSelected(event: Event) {

@@ -15,7 +15,7 @@ import kotlin.math.sqrt
 @Layout(R.layout.card_event_swipe_view)
 class EventCard(
     private val context: Context,
-    private val event: Event,
+    private var event: Event,
     private val cardViewHolderSize: Point
 ) {
 
@@ -45,18 +45,16 @@ class EventCard(
 
     @Resolve
     fun onResolved() {
-        if(event.picUrl!="") {
+        if (event.picUrl != "") {
             Picasso.get()
                 .load(event.picUrl)
-                .resize(800, 800)
-                .centerInside()
+                .resize(900, 900).centerInside()
+
                 .into(profileImageView)
-        }
-        else{
+        } else {
             Picasso.get()
                 .load(Utils.getSampleEventUrl())
-                .resize(800, 800)
-                .centerInside()
+                .resize(900, 900).centerInside()
                 .into(profileImageView)
         }
 //        eventNameText.text = "${profile.name},  ${profile.age}"

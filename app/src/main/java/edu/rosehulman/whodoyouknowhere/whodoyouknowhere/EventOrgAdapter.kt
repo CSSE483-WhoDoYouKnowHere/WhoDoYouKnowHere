@@ -8,22 +8,24 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentChange
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
-import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.add_event_dialog.view.*
-import kotlinx.android.synthetic.main.card_user_view.view.*
 
 
 class EventOrgAdapter(
     val context: Context?,
     var uid: String,
-    val listener: EventOrgFragment.OnEventOrgFragmentSelectedListener?
+    val listener: EventOrgFragment.OnEventOrgFragmentSelectedListener?,
+    var userId: String
 ) : RecyclerView.Adapter<EventOrgViewHolder>(), ItemTouchHelperAdapter {
 
 
     private val user = FirebaseAuth.getInstance().currentUser
-    private var eventsHosted = ArrayList<Event>()
+    //private var eventsHostedMap: HashMap<String, Boolean>? = null
+    private var eventsHostedList = ArrayList<Event>()
+    private var eventMap: MutableMap<String, Int>? = null
     private val eventsRef = FirebaseFirestore
         .getInstance()
         .collection(Constants.EVENTS_COLLECTION)
@@ -32,18 +34,29 @@ class EventOrgAdapter(
         .collection(Constants.USERS_COLLECTION)
 //        .document(uid)
 
-    //Do we need another events arraylist?-
 
     init {
         uid = user!!.uid
-        this.addEventSnapshotListener()
         Log.d(Constants.TAG, "UID is: $uid")
-        //userRef.add(uid)
-//        userRef.document(uid).get().addOnSuccessListener { snapShot: DocumentSnapshot ->
-//            eventsHosted = snapShot.toObject(User::class.java)?.eventsHosting ?: ArrayList<Event>(0)
-//            //What I think it happening: there is no user object stored in the user collection so we are getting an empty array
-//            //TODO: Fix
+
+        //Get the events hosted map from the user
+        userRef.document(userId).get().addOnSuccessListener { document: DocumentSnapshot ->
+            eventMap = document["eventMap"] as MutableMap<String, Int>? ?: mutableMapOf<String, Int>()
+            val tempUser = document.toObject(User::class.java)
+            tempUser!!.eventMap = eventMap!!
+            userRef.document(userId).set(tempUser)
+        }
+
+        //Get the eventsHostedList list
+//        for(keyID in eventsHostedMap.keys){
+//            eventsRef.document(keyID).get().addOnSuccessListener { document: DocumentSnapshot ->
+//                eventsHostedList.add(Event.fromSnapshot(document))
+//            }
 //        }
+
+        this.addEventSnapshotListener()
+//        this.addUserSnapshotListener()
+
     }
 
     fun addEventSnapshotListener() {
@@ -64,20 +77,20 @@ class EventOrgAdapter(
             val event = Event.fromSnapshot(docChange.document)
             when (docChange.type) {
                 DocumentChange.Type.ADDED -> {
-                    Log.d(Constants.TAG, "Event: $event added")
-                    eventsHosted.add(0, event)
+                    Log.d(Constants.TAG, "Event: $event added in EventOrgAdapter")
+                    eventsHostedList.add(0, event)
                     notifyItemInserted(0)
                 }
                 DocumentChange.Type.REMOVED -> {
-                    Log.d(Constants.TAG, "Event: $event removed")
-                    val position = eventsHosted.indexOf(event)
-                    eventsHosted.removeAt(position)
+                    Log.d(Constants.TAG, "Event: $event removed in EventOrgAdapter")
+                    val position = eventsHostedList.indexOf(event)
+                    eventsHostedList.removeAt(position)
                     notifyItemRemoved(position)
                 }
                 DocumentChange.Type.MODIFIED -> {
-                    Log.d(Constants.TAG, "Event: $event modified")
-                    val position = eventsHosted.indexOfFirst { event.id == it.id }
-                    eventsHosted[position] = event
+                    Log.d(Constants.TAG, "Event: $event modified in EventOrgAdapter")
+                    val position = eventsHostedList.indexOfFirst { event.id == it.id }
+                    eventsHostedList[position] = event
                     notifyItemChanged(position)
                 }
             }
@@ -96,22 +109,24 @@ class EventOrgAdapter(
         if (index >= 0) {
             //Edit
             builder.setTitle("Edit this event")
-            view.add_name_edit_text.setText(eventsHosted[index].title) //Type of text is editable, not a string
-            view.add_date_edit_text.setText(eventsHosted[index].date)
-            view.add_location_edit_text.setText(eventsHosted[index].location)
-            view.add_picture_edit_text.setText(eventsHosted[index].picUrl)
+            view.add_name_edit_text.setText(eventsHostedList[index].title) //Type of text is editable, not a string
+            view.add_date_edit_text.setText(eventsHostedList[index].date)
+            view.add_location_edit_text.setText(eventsHostedList[index].location)
+            view.add_picture_edit_text.setText(eventsHostedList[index].picUrl)
         }
 
         builder.setPositiveButton(android.R.string.ok, { _, _ ->
             val title = view.add_name_edit_text.text.toString()
             val date = view.add_date_edit_text.text.toString()
             val location = view.add_location_edit_text.text.toString()
-            picUrl = view.add_picture_edit_text.text.toString()
+            picUrl =
+                if (!view.add_picture_edit_text.text.toString().equals("")) view.add_picture_edit_text.text.toString() else Utils.getSampleEventUrl()
             if (index >= 0) {
                 edit(index, title, date, location)
-            } else {
-                add(Event(0, title, date, location, picUrl))
 
+            } else {
+//                add(Event("", title, date, location, picUrl))
+                add(title, date, location, picUrl)
             }
 
         })
@@ -126,52 +141,93 @@ class EventOrgAdapter(
         builder.create().show()
     }
 
-    fun add(event: Event) {
-        eventsRef.add(event)
+    //    fun add(event: Event) {
+    fun add(title: String, date: String, location: String, picUrl: String) {
+        val docRef = eventsRef.document()
+        val event = Event(docRef.id, title, date, location, picUrl)
+        event.userMap[userId]=Constants.HOSTING
 
+        docRef.set(event).addOnSuccessListener {
+
+            setUsersEventMapTo(event, Constants.HOSTING)
+        }
+//        eventsRef.add(event).addOnSuccessListener {
+//            Log.d(Constants.ARG_EVENT_ID, "Event added with ID: ${it.id}")
+//            event.eventID = it.id
+//            event.userMap[userId]= Constants.HOSTING
+//            eventsRef.document(it.id).set(event)
+//
+//            setUsersEventMapTo(event, Constants.HOSTING)
+//
+//        }
     }
 
     fun edit(index: Int, title: String, date: String, location: String) {
 
-        val temp = eventsHosted[index].copy()
+        val temp = eventsHostedList[index].copy()
         temp.title = title
         temp.date = date
         temp.location = location
 
-        eventsHosted[index].title = title
-        eventsHosted[index].date = date
-        eventsHosted[index].location = location
+        eventsHostedList[index].title = title
+        eventsHostedList[index].date = date
+        eventsHostedList[index].location = location
 
 
         //More?
-        eventsRef.document(eventsHosted[index].id).set(temp)
+        eventsRef.document(eventsHostedList[index].id).set(temp)
+    }
+
+    private fun setUsersEventMapTo(event: Event, state: Int) {
+        var tempUser: User?
+
+        userRef.document(userId).get().addOnSuccessListener { document: DocumentSnapshot ->
+            tempUser = document.toObject(User::class.java)
+            Log.d(Constants.ARG_EVENT_ID, "TempUser ${tempUser}")
+
+            tempUser!!.eventMap[event.eventID] = state
+
+            Log.d(Constants.ARG_EVENT_ID, "event ID : ${event.eventID}")
+            Log.d(Constants.ARG_EVENT_ID, "eventMap : ${tempUser!!.eventMap}")
+
+            Log.d(Constants.ARG_EVENT_ID, "$tempUser")
+            userRef.document(userId).set(tempUser!!)
+        }
+    }
+
+    private fun getEventFromEventID(eventId: String) {
+
+    }
+
+    private fun getUserFromUserID(userId: String) {
+
     }
 
     private fun remove(index: Int) {
         //Delete from the "events" collection in Firebase
-        eventsRef.document(eventsHosted[index].id).delete()
+        eventsRef.document(eventsHostedList[index].id).delete()
 
-        //Delete from the user's eventsHosted ArrayList<Event> done in processSnapShotDiffs
+        //Delete from the user's eventsHostedList ArrayList<Event> done in processSnapShotDiffs
         //Or is is...? Only removed locally I think, not in firebase...
-        //TODO: Probably add another snapshot listener for the user's eventsHosted list :-(
+        //TODO: Probably add another snapshot listener for the user's eventsHostedList list :-(
     }
 
     override fun onItemMove(fromPosition: Int, toPosition: Int) {
-        val prev = eventsHosted.removeAt(fromPosition)
-        eventsHosted.add(if (toPosition > fromPosition) toPosition - 1 else toPosition, prev)
+        val prev = eventsHostedList.removeAt(fromPosition)
+        eventsHostedList.add(if (toPosition > fromPosition) toPosition - 1 else toPosition, prev)
         notifyItemMoved(fromPosition, toPosition)
     }
 
     override fun onItemDismiss(position: Int) {
 
-        eventsRef.document(eventsHosted[position].id).delete()
+        eventsRef.document(eventsHostedList[position].id).delete()
 
     }
 
-    override fun getItemCount() = eventsHosted.size
+    override fun getItemCount() = eventsHostedList.size
 
     override fun onBindViewHolder(holder: EventOrgViewHolder, position: Int) {
-        holder.bind(eventsHosted[position])
+        holder.bind(eventsHostedList[position])
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EventOrgViewHolder {
@@ -180,7 +236,7 @@ class EventOrgAdapter(
     }
 
     fun selectEventHosted(index: Int) {
-        listener?.onEventOrgFragmentSelected(eventsHosted[index])
+        listener?.onEventOrgFragmentSelected(eventsHostedList[index])
     }
 
 
